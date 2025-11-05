@@ -71,14 +71,14 @@
         <h2>Novo Chamado</h2>
         <hr>
         <div class="forms forms-newcall scroll-xy">
+            <!--Inserir nome do Aluno-->
+            <label for="studentName" class="label-chamado">Nome Completo do Aluno<span class="required">*</span></label>
+            <input type="text" name="studentName" id="studentName" class="input-chamado" autocomplete="name" value="" required>
             <div class="small-input">
                 <div class="group-input">
-                    <!--Inserir nome do Aluno-->
-                    <label for="studentName">Nome do Aluno <span class="required">*</span></label>
-                    <input type="text" name="studentName" id="studentName" autocomplete="name" value="" required>
-                    <!--Inserir E-mail do Aluo-->
-                    <label for="studentEmail">E-mail <span class="required">*</span></label>
-                    <input type="email" name="studentEmail" id="studentEmail" autocomplete="email" value="" required>
+                    <!--Inserir o RA do Aluno-->
+                    <label for="ra">RA <span class="required">*</span></label>
+                    <input type="text" name="ra" id="ra" value="" required>
                     <!--Inserir a Categoria-->
                     <label for="formCategoria">Categoria <span class="required">*</span></label>
                     <select name="formCategoria" id="formCategoria" required>
@@ -93,9 +93,9 @@
                     </select>
                 </div>
                 <div class="group-input">
-                    <!--Inserir o RA do Aluno-->
-                    <label for="ra">RA <span class="required">*</span></label>
-                    <input type="text" name="ra" id="ra" value="" required>
+                    <!--Inserir E-mail do Aluo-->
+                    <label for="studentEmail">E-mail <span class="required">*</span></label>
+                    <input type="email" name="studentEmail" id="studentEmail" autocomplete="email" value="" required>
                     <!--Inserir o Curso do ALuno-->
                     <label for="studentArea">Curso <span class="required">*</span></label>
                     <select type="text" name="studentArea" id="studentArea" required>
@@ -109,14 +109,7 @@
                         <option value="Gestão de TI">Gestão de TI</option>
                         <option value="direito">Direito</option>
                     </select>
-                    <!--Inserir a Prioridade/nível de risco do Problema-->
-                    <label for="priority">Prioridade <span class="required">*</span></label>
-                    <select name="priority" id="priority" required>
-                        <option value="Baixa" selected>Baixa</option>
-                        <option value="Média">Média</option>
-                        <option value="Alta">Alta</option>
-                        <option value="Urgente">Urgente</option>
-                    </select>
+                    
                 </div>
             </div>
             <br>
@@ -187,18 +180,14 @@
                     <h3 class="title-dados">Descrição da Dúvida</h3>
                     <p class="dados textogrande" id="description"></p>
                 </div>
-                <!-- Integração com IA
-                
                 <hr>
+                <!--Integração com IA-->
                 <div class="ia-box">
-                    <div class="bp-embedded-webchat">
-                        <p></p>
+                    <div id="bp-toggle-chat">
+                        <p>Consultar IA</p>
                     </div>
                 </div>
-                
-                        https://cdn.botpress.cloud/webchat/v3.3/shareable.html?configUrl=https://files.bpcontent.cloud/2025/11/05/01/20251105010738-5JWAHFBJ.json
-                -->
-                
+                        <!--https://cdn.botpress.cloud/webchat/v3.3/shareable.html?configUrl=https://files.bpcontent.cloud/2025/11/05/01/20251105010738-5JWAHFBJ.json-->
             </div>
             <!--Chat Online-->
             <div class="div-chat ">
@@ -248,7 +237,11 @@
     <!--Script-->
     <script src="../../script/menu.js"></script>
     <script type="module" src="../../script/manageAcounts.js"></script>
+    <!--IA
+    
     <script src="https://cdn.botpress.cloud/webchat/v3.3/inject.js"></script>
-    <!--<script src="https://files.bpcontent.cloud/2025/11/05/01/20251105010738-XX85YQ92.js" defer></script>-->
+    <script src="https://files.bpcontent.cloud/2025/11/05/01/20251105010738-XX85YQ92.js" defer></script>
+    -->
+    
 </body>
 </html>

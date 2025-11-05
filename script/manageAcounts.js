@@ -16,7 +16,8 @@ import {getFirestore,
     limit,
     orderBy,
     getDocs,
-    startAfter
+    startAfter,
+    where
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 
@@ -179,7 +180,7 @@ class LoginController {
                 window.location.href = '/pages/employee/main.html';
                 break;
             case 'Aluno':
-                window.location.href = '';
+                window.location.href = '/pages/student/main.html';
                 break;
             default: 
                 console.log('Erro ao redirecionar a página.');
@@ -207,6 +208,7 @@ class LoginController {
                     .definirCurso(curso)
                     .definirPapel(papel)
                     .definirDataCadastro(dataCadastro)
+                    .definirUid(uid)
                     .Build();
 
                 console.log(this.AtualUser);
@@ -231,8 +233,12 @@ class LoginController {
         const currentPath = window.location.pathname;
         if(user){
             this.AtualUser = JSON.parse(user);            
-            console.log('Usuário recuperado do localStorage');
+            console.log('Usuário recuperado do localStorage', this.AtualUser);
             if (currentPath.includes('login.html') || currentPath.includes('cadastro.html'))
+                this.redirect(this.AtualUser.papel);
+            if (this.AtualUser.papel === 'Aluno' && (!currentPath.includes('student') && !currentPath.includes('redefinirSenhar.html')))
+                this.redirect(this.AtualUser.papel);
+            if (this.AtualUser.papel === 'Funcionário' && (!currentPath.includes('employee') && !currentPath.includes('redefinirSenhar.html')))
                 this.redirect(this.AtualUser.papel);
         }
         else if (!currentPath.includes('/login.html') && !currentPath.includes('/cadastro.html') && !currentPath.includes('/redefinirSenha.html'))
@@ -301,13 +307,18 @@ class UserBuilder {
         return this;
     }
 
+    definirUid(uid){
+        this.user.uid = uid;
+        return this;
+    }
+
     Build(){
         return this.user;
     }
 }
 
-let registerController = new RegisterController();
-let loginController = new LoginController();
+const registerController = new RegisterController();
+const loginController = new LoginController();
 
 const btnCadastro = document.querySelector('.btn_cadastrar');
 if (btnCadastro){
@@ -354,8 +365,8 @@ class Chamado {
         this.categoria = '';
         this.tituloChamado = '';
         this.descricaoChamado = '';
-        this.dataCriacao = new Date(); //valor padrão
-        this.dataAtualizacao = new Date(); //valor padrão
+        this.dataCriacao = new Date().toLocaleDateString(); //valor padrão
+        this.dataAtualizacao = new Date().toLocaleDateString(); //valor padrão
     }
 
     toFirestore(){
@@ -400,6 +411,11 @@ class BuilderChamado {
 
     definirRaAluno(raAluno){ //Verificar se esse RA existe antes de definir, mas ai eu posso fazer isso no Controller
         this.chamado.raAluno = raAluno;
+        return this;
+    }
+
+    definirUserId(userId){
+        this.chamado.userID = userId;
         return this;
     }
 
@@ -496,7 +512,8 @@ class ControllerChamado {
             .definirCategoria(categoria)
             .definirPrioridade(prioridade)
             .definirTituloChamado(tituloChamado)
-            .definirDescricaoChamado(description);
+            .definirDescricaoChamado(description)
+            .definirUserId(loginController.AtualUser.uid);
         
         this.adicionar(builderChamado.Build());
         return builderChamado.Build();
@@ -609,12 +626,19 @@ class ControllerChamado {
 
         const chamadosCollectionRef = collection(db, "chamados");
 
-        let q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), limit(PAGE_SIZE));
-
-        if (startAfterDoc) {
-            q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), startAfter(startAfterDoc), limit(PAGE_SIZE));
+        let q;
+        if (loginController.AtualUser.papel == 'Aluno'){
+            if (startAfterDoc)
+                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.AtualUser.uid), startAfter(startAfterDoc), limit(PAGE_SIZE));
+            else
+                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.AtualUser.uid), limit(PAGE_SIZE));
+        } else {
+            if (startAfterDoc) 
+                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), startAfter(startAfterDoc), limit(PAGE_SIZE));
+            else
+                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), limit(PAGE_SIZE));
         }
-
+            
         try {
             const querySnaptshot = await getDocs(q);
 
@@ -662,7 +686,7 @@ class ControllerChamado {
             console.error('Não foi encontrado o Popup de detalhes do chamado.');
             return;
         }
-
+        
         document.getElementById('tituloChamado').textContent = chamado.tituloChamado;
         document.getElementById('nomeAluno').textContent = chamado.nomeAluno;
         document.getElementById('raAluno').textContent = chamado.raAluno;
@@ -697,7 +721,7 @@ if (btnAddCall){
         document.getElementById('formCategoria').value = '';
         document.getElementById('ra').value = '';
         document.getElementById('studentArea').value = '';
-        document.getElementById('priority').value = 'low';
+        //document.getElementById('priority').value = '';
         document.getElementById('call-title').value = '';
         document.getElementById('formDescription').value = '';
     });
@@ -712,7 +736,7 @@ if (btnCancelCall){
         document.getElementById('categoria').value = '';
         document.getElementById('ra').value = '';
         document.getElementById('studentArea').value = '';
-        document.getElementById('priority').value = 'low';
+        //document.getElementById('priority').value = '';
         document.getElementById('call-title').value = '';
         document.getElementById('formDescription').value = '';
     });
