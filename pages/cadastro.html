@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastre-se</title>
+    <link rel="shortcut icon" href="../images/logo.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../styles/accessPattern.css">
+    <link rel="stylesheet" href="../styles/scale.css">
+</head>
+<body>
+    <main>
+        <h1 class="titles">Cadastro</h1>
+        <hr>
+        <p>Crie uma conta para acessar o sistema</p>
+        <br>
+        <form class="forms_cadastro">
+            <label for="nomecompleto">Nome Completo</label>
+            <div class="input_data">
+                <input type="text" name="nomecompleto" id="nomecompleto" autocomplete="name" value="" required>
+
+            </div>
+            <label for="curso">Curso</label>
+            <div class="input_data">
+                <select type="text" name="curso" id="curso" required>
+                    <option value="" selected hidden>Escolha um Curso</option>
+                    <option value="ads">Análise e Desenvolvimento de Sistemas</option>
+                    <option value="cienciaComputacao">Ciência da Computação</option>
+                    <option value="engenhariaSoftware">Engenharia de Software</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="nutricao">Nutrição</option>
+                    <option value="medicina">Medicina</option>
+                    <option value="gestaoTI">Gestão de TI</option>
+                    <option value="direito">Direito</option>
+                </select>
+            </div>
+            <label for="c_email">E-mail</label>
+            <div class="input_data">
+                <input type="email" name="c_email" id="c_email" autocomplete="email" value="" required>
+            </div>
+            <!--<hr class="hr_space">-->
+            <label for="c_senha">Senha</label>
+            <div class="input_data">
+                <input type="password" name="c_senha" id="c_senha" autocomplete="current-password" value="" required>
+            </div>
+            <label for="c_confirmar_senha">Confirme a senha</label>
+            <div class="input_data">
+                <input type="password" name="c_confirmar_senha" id="c_confirmar_senha" autocomplete="new-password" value="" required>
+            </div>
+            <button class="btn btn_cadastrar" type="submit">Cadastrar</button>
+            <a href="login.html" class="lnk lnk_com_conta">Já possui uma conta?</a>
+        </form>
+    </main>
+    <script type="module" src="../script/manageAcounts.js"></script>
+</body>
+</html>

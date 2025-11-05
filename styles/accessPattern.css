@@ -1,0 +1,229 @@
+@charset "UTF-8";
+
+:root {
+    --azul-principal: rgb(8, 116, 247);
+    --azul-secundario: #386596;
+    --cinza: rgb(100, 120, 146);
+    --laranja: #D6911A;
+    --marrom: #81673B;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+
+/*PADRÃO DAS PÁGINAS*/
+body {
+    background-color: var(--azul-principal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main {
+    background-color: white;
+    padding: 20px;
+    
+    width: 95%;
+    max-width: 500px;
+
+    border-radius: 10px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.3);
+}
+
+.titles {
+    text-align: center;
+    padding: 5px;
+}
+
+h1 {
+    font-size: 1.5em;
+}
+
+h2 {
+    font-size: 1.2em;
+    
+    margin-bottom: 10px;
+}
+
+main p{
+    text-align: center;
+    color: var(--cinza);
+    font-size: 1em;
+    line-height: 1.5em;
+}
+
+/*BOTÕES PARA ESCOLHER QUAL PLATAFORMA ACESSAR*/
+.ul_options_to_access {
+    list-style: none;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.ul_options_to_access li, .btn_download {
+    display: block;
+}
+
+.btn_download {
+    text-decoration: none;
+    text-align: center;
+    padding: 10px;
+    border-radius: 50px;
+    margin: 10px 0;
+    border: 2px solid var(--azul-secundario);
+
+    transition: background-color .4s, box-shadow .4s;
+}
+    .btn_download:hover{
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+    .btn_download:active{
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.4) inset;
+    }
+
+.web {
+    background-color: var(--azul-principal);
+    color: white;
+    
+}
+
+.desktop {
+    color: var(--azul-secundario);
+}
+
+.desktop span {
+    color: var(--laranja);
+}
+
+.mobile {
+    color: var(--azul-secundario);
+}
+
+.mobile span {
+    color: var(--laranja);
+}
+
+/*CONFIGURAÇÃO DOS FORMULÁRIOS*/
+.forms_cadastro, .forms_login {
+    display: flex;
+    margin-top: 10px;
+    flex-flow: column nowrap;
+}
+
+.forms_cadastro label, .forms_login label{
+    padding-left: 5px;
+}
+
+.input_data {
+    display: flex;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    flex: 1;
+    padding: 8px;
+    align-items: center;
+}
+    .input_data:hover {
+        border-color: var(--cinza);
+    }
+    .input_data:has(input:focus){
+        border: 2px solid var(--azul-principal);;
+    }
+
+.input_data input{
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    font-size: 1em;
+}
+    .input_data input::placeholder{
+        font-size: 0.8em;
+    }
+
+.input_data select{
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    font-size: 1em;
+}
+
+.input_data span {
+    padding: 0 5px;
+    transform: translateY(-7%);
+}
+
+.hr_space{
+    margin: 8px 0;
+}
+
+.lnk {
+    text-decoration: none;
+    font-size: 0.9em;
+}
+    .lnk:hover{
+        text-decoration: underline;
+    }
+
+.lnk_esqueceu_senha{
+    align-self: flex-start;
+}
+
+.lnk_sem_conta, .lnk_com_conta{
+    align-self: center;
+}
+
+.btn{
+    border: none;
+    border-radius: 10px;
+    background-color: var(--azul-principal);
+    padding: 8px;
+
+    color: white;
+    font-size: 1em;
+    transition: background-color .4s, box-shadow .4s;
+}
+    .btn:hover{
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    }
+    .btn:active{
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.4) inset;
+    }
+
+.btn_entrar{
+    margin: 15px 0;
+}
+
+.btn_cadastrar {
+    margin: 15px 0;
+}
+
+/*Configurção do icones*/
+.material-symbols-outlined {
+font-variation-settings:
+'FILL' 0,
+'wght' 400,
+'GRAD' 0,
+'opsz' 20
+}
+    .material-symbols-outlined.fill{
+        font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20
+    }
