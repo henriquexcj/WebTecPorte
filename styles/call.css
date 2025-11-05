@@ -11,11 +11,13 @@
 .light-mode {
     --fundo: white;
     --texto: black;
+    --texto-2: var(--cinza);
 }
 
 .dark-mode {
     --fundo: rgb(80, 80, 80);
     --texto: white;
+    --texto-2: rgb(165, 183, 206);
 }
 
 .nav_options{
@@ -348,7 +350,7 @@ td p {
 
 .details-chamado {
     background-color: var(--fundo);
-    padding: 20px;
+    padding: 8px;
     width: 85%;
     max-width: 1000px;
     height: 70%;
@@ -374,16 +376,18 @@ td p {
 
 .header-chamado{
     display: flex;
-    margin-bottom: 10px;
 }
 
-.header-chamado > h1 {
+.header-chamado > .title {
     flex: 1;
+    
+    padding: 5px 0 10px 8px;
 }
 
 .material-symbols-outlined.close-details-chamado{
-    font-size: 30px;
+    font-size: 35px;
     cursor: pointer;
+    align-self: center;
 }
 
 .dados-chamado{
@@ -426,7 +430,7 @@ td p {
 .title-dados {
     font-weight: lighter;
     font-size: 0.9em;
-    color: var(--cinza);
+    color: var(--texto-2);
 }
 
 .dados {
@@ -434,11 +438,46 @@ td p {
 }
 
 .div-chat {
-    background-color: black;
-    padding: 20px;
+    padding: 10px;
     flex: 1;
+    border-left: 2px solid #ccc;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+#ver-msg {
+    flex: 1;
+    border: 2px solid var(--texto-2);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
     overflow-y: auto;
-    overflow-x: none;
+}
+
+#controls-chat {
+    flex: 0;
+    border: 2px solid var(--texto-2);
+    background-color: var(--fundo);
+    border-radius: 15px;
+    display: flex;
+}
+
+#escrever-msg {
+    outline: none;
+    border: none;
+    background-color: var(--fundo);
+    margin: 5px;
+    color: var(--texto);
+    text-decoration: none;
+    font-size: 1em;
+    border-radius: 10px 10px 0 0;
+    resize: none;
+}
+
+#enviar-msg {
+    flex: 0;
+    align-self: center;
+
 }
 
 main {
@@ -454,8 +493,7 @@ main {
     height: 80px;
     overflow-y: auto;
     text-wrap: wrap;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    border-top: 2px solid var(--texto-2);
     padding: 5px;
     margin-top: 5px;
     font-weight: normal;

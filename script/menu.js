@@ -94,7 +94,8 @@ if(btnChangeTheme){
     btnChangeTheme.addEventListener('click', () =>{
         addClasses.addDarkLightMode('.settings-itens');
         addClasses.addDarkLightMode('main');
-        addClasses.addDarkLightMode('.newcall-box')
+        addClasses.addDarkLightMode('.newcall-box');
+        addClasses.addDarkLightMode('.details-chamado');
     });
 
 }
