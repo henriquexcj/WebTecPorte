@@ -18,7 +18,8 @@ import {getFirestore,
     getDocs,
     startAfter,
     where,
-    onSnapshot
+    onSnapshot,
+    updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 
@@ -690,7 +691,8 @@ class ControllerChamado {
             console.error('Não foi encontrado o Popup de detalhes do chamado.');
             return;
         }
-        
+        this.chamado = chamado;
+        this.verificarResolvido(chamado);
         document.getElementById('tituloChamado').textContent = chamado.tituloChamado;
         document.getElementById('nomeAluno').textContent = chamado.nomeAluno;
         document.getElementById('raAluno').textContent = chamado.raAluno;
@@ -747,6 +749,49 @@ class ControllerChamado {
         }
 
         return prioridadeAutomatica;
+    }
+
+    async atualizarChamado(status = null){
+        if (!this.chamado?.idChamado) {
+            console.error("Erro: idChamado não definido!");
+            return;
+        }
+
+        const chamadosCollectionRef = doc(db, `chamados/${this.chamado.idChamado}`);
+
+        try {
+            if (status) {
+                this.chamado.status = status;
+            }
+            this.chamado.dataAtualizacao = new Date();
+
+            await updateDoc(chamadosCollectionRef, this.chamado);
+
+            const chamadoAtualizado = await getDoc(chamadosCollectionRef);
+            if (chamadoAtualizado.exists()){
+                console.log("Dados atualizados: ", chamadoAtualizado.data());
+            }
+        } catch (error) {
+            console.error("Erro ao tentar atualizar o documento do chamado: ", error);
+            
+        }
+    }
+
+    verificarResolvido(chamado){
+        if(chamado.status === 'Resolvido'){
+            const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
+            if (btnFinalizarCadastro){
+                btnFinalizarCadastro.classList.add('resolvido-config');
+            }
+            const controlsChat = document.getElementById('controls-chat');
+            if (controlsChat){
+                controlsChat.classList.add('resolvido-config');
+            }
+            const iaBox = document.querySelector('.ia-box');
+            if (iaBox) {
+                iaBox.classList.add('resolvido-config');
+            }
+        }
     }
 }
 
@@ -848,6 +893,15 @@ if (btnNextPageTable){
             controllerChamado.cursorHistory.push(nextCursor);
 
         controllerChamado.atualizarControles(isLastPage);
+    });
+}
+
+const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
+if (btnFinalizarCadastro) {
+    btnFinalizarCadastro.addEventListener('click', () => {
+        controllerChamado.atualizarChamado('Resolvido');
+        alert('Chamado resolvido com sucesso!');
+        controllerChamado.CarregarChamados();
     });
 }
 
@@ -1149,4 +1203,19 @@ if (btnConsultarIA) {
     });
 }
 
+const simRespondido = document.getElementById('sim-respondido');
+if (simRespondido) {
+    simRespondido.addEventListener('click', () => {
+        controllerChamado.atualizarChamado('Resolvido');
+        alert('O chamado foi marcado como resolvido. As opções de interação foram desativadas.')
+    });
+}
+
+const naoRespondido = document.getElementById('nao-respondido');
+if (naoRespondido) {
+    naoRespondido.addEventListener('click', () => {
+        controllerChamado.
+        alert('Entendido. Por favor, utilize o chat principal para detalhar sua dúvida.');
+    });
+}
 

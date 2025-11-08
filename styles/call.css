@@ -464,6 +464,14 @@ td p {
     display: flex;
 }
 
+#controls-chat.resolvido-config {
+    display: none;
+}
+
+.resolvido-config {
+    display: none;
+}
+
 #escrever-msg {
     outline: none;
     border: none;
@@ -544,20 +552,35 @@ main {
     flex-flow: column nowrap;
 }
 
+.ia-box.resolvido-config {
+    display: none;
+}
+
 #consultarIA{
     width: 90%;
     align-self: center;
     color: var(--texto);
+    background-color: var(--fundo);
+    border: 2px solid var(--texto-2);
     font-size: 1em;
     margin: 0;
     flex: 0;
 }
 
-.chat-ia {
-    padding: 5px;
+#finalizarCadastro {
+    width: 90%;
+    align-self: center;
+    color: var(--texto);
+    background-color: var(--fundo);
     border: 2px solid var(--texto-2);
-    border-radius: 10px;
-    min-height: 100px;
+    font-size: 1em;
+    margin: 0;
+    flex: 0;
+}
+
+
+
+.chat-ia {
     margin-top: 12px;
     display: none;
 }
@@ -566,10 +589,29 @@ main {
     display: block;
 }
 
+.pergunta {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.sim-nao {
+    display: flex;
+}
+
+#sim-respondido, #nao-respondido {
+    flex: 1;
+    border: 2px solid var(--texto-2);
+    color: var(--texto);
+    background-color: var(--fundo);
+}
+
 #resposta-ia {
     font-size: 1em;
     color: var(--texto);
-    
+    padding: 5px;
+    border: 2px solid var(--texto-2);
+    border-radius: 10px;
+    min-height: 100px;
 }
 
 .bp-embedded-webchat {
