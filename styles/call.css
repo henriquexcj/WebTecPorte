@@ -532,21 +532,48 @@ main {
     padding: 2px 15px;
 }
 
+.hr {
+    max-height: 1px;
+    
+    margin: 10px;
+}
+
 .ia-box {
     width: 100%;
-    height: 1000px;
-    background-color: blue;
-
+    display: flex;
+    flex-flow: column nowrap;
 }
 
-.ia-box iframe {
-    width: 100%;
-    height: 100%;
+#consultarIA{
+    width: 90%;
+    align-self: center;
+    color: var(--texto);
+    font-size: 1em;
+    margin: 0;
+    flex: 0;
 }
 
+.chat-ia {
+    padding: 5px;
+    border: 2px solid var(--texto-2);
+    border-radius: 10px;
+    min-height: 100px;
+    margin-top: 12px;
+    display: none;
+}
+
+.chat-ia.active {
+    display: block;
+}
+
+#resposta-ia {
+    font-size: 1em;
+    color: var(--texto);
+    
+}
 
 .bp-embedded-webchat {
-    width: 100%;
+    width: 80%;
     height: 200px;
     background-color: blue;
 }
@@ -587,3 +614,4 @@ main {
     font-size: 0.7em;
     padding-top: 5px;
 }
+

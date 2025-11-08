@@ -805,6 +805,12 @@ if (btnCloseDetailsChamado){
             return;
         }
         detailChamadoBox.classList.toggle('active');
+        const chatIA = document.querySelector('.chat-ia');
+        if(chatIA && chatIA.classList.contains('active')){
+            chatIA.classList.remove('active');
+            const respostaIA = document.getElementById('resposta-ia');
+            respostaIA.textContent = '';
+        }
     });
 }
 
@@ -1103,17 +1109,44 @@ const msgController = new MsgController(db, loginController);
 
 //import { ConsultarIA } from "./index.js";
 
-const displayReposta = document.getElementById('resposta-ia');
-if (!displayReposta) {
-    console.error('Não foi possível encontrar o lugar onde enviar as repostas da IA');
-}
+const displayResposta = document.getElementById('resposta-ia');
 
 const btnConsultarIA = document.getElementById('consultarIA');
 if (btnConsultarIA) {
     btnConsultarIA.addEventListener('click', () => {
         const pergunta = document.getElementById('description').textContent;
 
-        ConsultarIA(pergunta, displayReposta);
+        
+        displayResposta.textContent = 'Consultando IA...';
+
+        fetch('http://localhost:3000/resposta-ia', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify ({
+                prompt: pergunta
+            })
+        })
+            .then(res => res.json())
+            .then(dados => {
+                displayResposta.innerHTML = dados.resposta
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+
+            })
+            .catch(err => console.error('Erro:', err));
+
+        const chatIA = document.querySelector('.chat-ia');
+        if (chatIA) {
+            chatIA.classList.add('active');
+        }
+        const displayDadosChamado = document.querySelector('.dados-chamado');
+        if (displayDadosChamado) {
+            displayDadosChamado.scrollTop = displayDadosChamado.scrollHeight
+        }
     });
 }
+
 
