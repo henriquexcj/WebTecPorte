@@ -779,18 +779,55 @@ class ControllerChamado {
 
     verificarResolvido(chamado){
         if(chamado.status === 'Resolvido'){
-            const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
-            if (btnFinalizarCadastro){
-                btnFinalizarCadastro.classList.add('resolvido-config');
-            }
-            const controlsChat = document.getElementById('controls-chat');
-            if (controlsChat){
-                controlsChat.classList.add('resolvido-config');
-            }
-            const iaBox = document.querySelector('.ia-box');
-            if (iaBox) {
-                iaBox.classList.add('resolvido-config');
-            }
+            this.fecharBtnFinalizarCadastro();
+            this.fecharControlesDoChat();
+            this.fecharChatIA();
+        } else {
+            this.abrirBtnFinalizarCadastro();
+            this.abrirControlesDoChat();
+            this.abrirChatIA();
+        }
+    }
+
+    fecharBtnFinalizarCadastro(){
+        const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
+        if (btnFinalizarCadastro){
+            btnFinalizarCadastro.classList.add('resolvido-config');
+        }
+    }
+
+    abrirBtnFinalizarCadastro(){
+        const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
+        if (btnFinalizarCadastro){
+            btnFinalizarCadastro.classList.remove('resolvido-config');
+        }
+    }
+
+    fecharControlesDoChat(){
+        const controlsChat = document.getElementById('controls-chat');
+        if (controlsChat){
+            controlsChat.classList.add('resolvido-config');
+        }
+    }
+
+    abrirControlesDoChat(){
+        const controlsChat = document.getElementById('controls-chat');
+        if (controlsChat){
+            controlsChat.classList.remove('resolvido-config');
+        }
+    }
+
+    fecharChatIA(){
+        const iaBox = document.querySelector('.ia-box');
+        if (iaBox) {
+            iaBox.classList.add('resolvido-config');
+        }
+    }
+
+    abrirChatIA(){
+        const iaBox = document.querySelector('.ia-box');
+        if (iaBox) {
+            iaBox.classList.remove('resolvido-config');
         }
     }
 }
@@ -1207,14 +1244,16 @@ const simRespondido = document.getElementById('sim-respondido');
 if (simRespondido) {
     simRespondido.addEventListener('click', () => {
         controllerChamado.atualizarChamado('Resolvido');
-        alert('O chamado foi marcado como resolvido. As opções de interação foram desativadas.')
+        controllerChamado.verificarResolvido();
+        alert('O chamado foi marcado como resolvido. As opções de interação foram desativadas.');
+        
     });
 }
 
 const naoRespondido = document.getElementById('nao-respondido');
 if (naoRespondido) {
     naoRespondido.addEventListener('click', () => {
-        controllerChamado.
+        controllerChamado.fecharChatIA();
         alert('Entendido. Por favor, utilize o chat principal para detalhar sua dúvida.');
     });
 }
