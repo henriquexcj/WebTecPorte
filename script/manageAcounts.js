@@ -17,7 +17,8 @@ import {getFirestore,
     orderBy,
     getDocs,
     startAfter,
-    where
+    where,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 
@@ -110,7 +111,7 @@ export class RegisterController {
         .definirEmail(this.email)
         .definirSenha(this.senha2)
         .definirPapel('Funcionário')
-        .definirDataCadastro(new Date().toLocaleDateString())
+        .definirDataCadastro(new Date())
         .Build();
 
         return user;
@@ -120,7 +121,7 @@ export class RegisterController {
 
 class LoginController {
     constructor(){
-        this.AtualUser = null;
+        this.atualUser = null;
     }
     $(id){
         return document.getElementById(id).value;
@@ -129,10 +130,10 @@ class LoginController {
     async execute(){
         if (this.pickupInfo()){
             await this.verifyAccount();
-            if (this.AtualUser){
-                this.redirect(this.AtualUser.papel);
+            if (this.atualUser){
+                this.redirect(this.atualUser.papel);
                 let changeText = new ChangeText();
-                changeText.changeText(this.AtualUser);
+                changeText.changeText(this.atualUser);
             }
             else
                 console.log('Login ok, mas não está carregando os dados.');
@@ -202,7 +203,7 @@ class LoginController {
                     papel,
                 } = docSnap.data();
 
-                this.AtualUser = new UserBuilder()
+                this.atualUser = new UserBuilder()
                     .definirNome(nome)
                     .definirEmail(email)
                     .definirCurso(curso)
@@ -211,10 +212,10 @@ class LoginController {
                     .definirUid(uid)
                     .Build();
 
-                console.log(this.AtualUser);
-                console.log(this.AtualUser.papel);
+                console.log(this.atualUser);
+                console.log(this.atualUser.papel);
 
-                localStorage.setItem('perfilUsuarioTecPorte', JSON.stringify(this.AtualUser));
+                localStorage.setItem('perfilUsuarioTecPorte', JSON.stringify(this.atualUser));
 
                 return docSnap.data();
 
@@ -232,14 +233,14 @@ class LoginController {
         let user = localStorage.getItem('perfilUsuarioTecPorte');
         const currentPath = window.location.pathname;
         if(user){
-            this.AtualUser = JSON.parse(user);            
-            console.log('Usuário recuperado do localStorage', this.AtualUser);
+            this.atualUser = JSON.parse(user);            
+            console.log('Usuário recuperado do localStorage', this.atualUser);
             if (currentPath.includes('login.html') || currentPath.includes('cadastro.html'))
-                this.redirect(this.AtualUser.papel);
-            if (this.AtualUser.papel === 'Aluno' && (!currentPath.includes('student') && !currentPath.includes('redefinirSenhar.html')))
-                this.redirect(this.AtualUser.papel);
-            if (this.AtualUser.papel === 'Funcionário' && (!currentPath.includes('employee') && !currentPath.includes('redefinirSenhar.html')))
-                this.redirect(this.AtualUser.papel);
+                this.redirect(this.atualUser.papel);
+            if (this.atualUser.papel === 'Aluno' && (!currentPath.includes('student') && !currentPath.includes('redefinirSenhar.html')))
+                this.redirect(this.atualUser.papel);
+            if (this.atualUser.papel === 'Funcionário' && (!currentPath.includes('employee') && !currentPath.includes('redefinirSenhar.html')))
+                this.redirect(this.atualUser.papel);
         }
         else if (!currentPath.includes('/login.html') && !currentPath.includes('/cadastro.html') && !currentPath.includes('/redefinirSenha.html'))
             window.location.href = '/pages/login.html';
@@ -361,12 +362,12 @@ class Chamado {
         this.emailAluno = '';
         this.curso = '';
         this.status = 'Aberto'; //valor padrão
-        this.prioridade = 'Baixa';
+        this.prioridade = 'Baixa'; //valor padrão
         this.categoria = '';
         this.tituloChamado = '';
         this.descricaoChamado = '';
-        this.dataCriacao = new Date().toLocaleDateString(); //valor padrão
-        this.dataAtualizacao = new Date().toLocaleDateString(); //valor padrão
+        this.dataCriacao = new Date(); //valor padrão
+        this.dataAtualizacao = new Date(); //valor padrão
     }
 
     toFirestore(){
@@ -500,8 +501,8 @@ class ControllerChamado {
         let categoria = this.selectValueByid('formCategoria');
         let raAluno = this.selectValueByid('ra');
         let curso = this.selectValueByid('studentArea');
-        let prioridade = this.selectValueByid('priority');
         let tituloChamado = this.selectValueByid('call-title');
+        let prioridade = this.definirPrioridade(tituloChamado);
         let description = this.selectValueByid('formDescription');
 
         let builderChamado = new BuilderChamado();
@@ -510,12 +511,11 @@ class ControllerChamado {
             .definirEmail(emailAluno)
             .definirCurso(curso)
             .definirCategoria(categoria)
-            .definirPrioridade(prioridade)
             .definirTituloChamado(tituloChamado)
             .definirDescricaoChamado(description)
-            .definirUserId(loginController.AtualUser.uid);
-        
-        this.adicionar(builderChamado.Build());
+            .definirUserId(loginController.atualUser.uid)
+            .definirPrioridade(prioridade);
+
         return builderChamado.Build();
     }
 
@@ -544,9 +544,9 @@ class ControllerChamado {
         td_status.innerHTML = `<p>${chamado.status}</p>`;
         td_prioridade.innerHTML = `<p>${chamado.prioridade}</p>`;
         td_idChamado.innerHTML = `<p>${chamado.idChamado}</p>`;
-        td_data.innerHTML = `<p>${chamado.dataCriacao}</p>`;
-        td_dataAtualizacao.innerHTML = `<p>${chamado.dataAtualizacao}</p>`;
-
+        td_data.innerHTML = `<p>${chamado.dataCriacao.toLocaleString('pt-BR')}</p>`;
+        td_dataAtualizacao.innerHTML = `<p>${chamado.dataAtualizacao.toLocaleString('pt-BR')}</p>`;
+        
         td_titulo.classList.add('left');
 
         switch(chamado.status){
@@ -612,6 +612,8 @@ class ControllerChamado {
         } catch (error){
             console.error("Erro ao adicionar o chamado:", error);
         }
+
+        this.CarregarChamados();
     }
 
     clearTable(){
@@ -627,11 +629,11 @@ class ControllerChamado {
         const chamadosCollectionRef = collection(db, "chamados");
 
         let q;
-        if (loginController.AtualUser.papel == 'Aluno'){
+        if (loginController.atualUser.papel == 'Aluno'){
             if (startAfterDoc)
-                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.AtualUser.uid), startAfter(startAfterDoc), limit(PAGE_SIZE));
+                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.atualUser.uid), startAfter(startAfterDoc), limit(PAGE_SIZE));
             else
-                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.AtualUser.uid), limit(PAGE_SIZE));
+                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.atualUser.uid), limit(PAGE_SIZE));
         } else {
             if (startAfterDoc) 
                 q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), startAfter(startAfterDoc), limit(PAGE_SIZE));
@@ -645,6 +647,8 @@ class ControllerChamado {
             querySnaptshot.forEach((doc) => {
                 const dados = doc.data();
                 dados.idChamado = doc.id;
+                dados.dataCriacao = dados.dataCriacao.toDate();
+                dados.dataAtualizacao = dados.dataAtualizacao.toDate();
                 this.adicionar(dados);
             });
 
@@ -704,6 +708,45 @@ class ControllerChamado {
                 detailChamadoBox.classList.remove('active');
             }
         }
+
+        
+        msgController.buscarMensagens(chamado.idChamado);
+        msgController.initEventListeners(chamado.idChamado);
+    }
+
+    definirPrioridade(titulo){
+        const tituloNormalizado = titulo.toLowerCase();
+
+        const palavrasChave = {
+            'Urgente': ["urgente", "parado", "nao funciona", "não funciona", "emergencia", "crítico", "bloqueado", "travou", "imediato"],
+            'Alta': ["erro", "lento", "travando", "problema", "falha", "bug", "acidente"],
+            'Média': ["ajuda", "dificuldade", "atraso", "duvida", "acesso", "instalar", "configurar"]
+        };
+
+        let prioridadeAutomatica = 'Baixa';
+
+        for (const keyword of palavrasChave['Urgente']){
+            if (tituloNormalizado.includes(keyword)) {
+                prioridadeAutomatica = 'Urgente';
+                return prioridadeAutomatica;
+            }
+        }
+
+        for (const keyword of palavrasChave['Alta']){
+            if (tituloNormalizado.includes(keyword)) {
+                prioridadeAutomatica = 'Alta';
+                return prioridadeAutomatica;
+            }
+        }
+
+        for (const keyword of palavrasChave['Média']){
+            if (tituloNormalizado.includes(keyword)) {
+                prioridadeAutomatica = 'Média';
+                return prioridadeAutomatica;
+            }
+        }
+
+        return prioridadeAutomatica;
     }
 }
 
@@ -825,5 +868,252 @@ class ChangeText{
 }
 
 const changeText = new ChangeText();
-if (loginController.AtualUser)
-    changeText.changeText(loginController.AtualUser);
+if (loginController.atualUser)
+    changeText.changeText(loginController.atualUser);
+
+//------------------------------------------------------------
+//------------------------CHAT ONLINE-------------------------
+//------------------------------------------------------------
+
+class Msg {
+    toFirestore(){
+        return {
+            usuarioId: this.usuarioId,
+            mensagem: this.mensagem,
+            idChamado: this.idChamado,
+            dataEnvio: this.dataEnvio
+        };
+    }
+}
+
+class MsgBuilder {
+    constructor(){
+        this.msg = new Msg();
+    }
+
+    definiridChamado(idChamado){
+        this.msg.idChamado = idChamado;
+        return this;
+    }
+
+    definirUsuarioId(usuarioId){
+        this.msg.usuarioId = usuarioId;
+        return this;
+    }
+
+    definirMensagem(mensagem){
+        this.msg.mensagem = mensagem;
+        return this;
+    }
+
+    definirDataEnvio(dataEnvio){
+        this.msg.dataEnvio = dataEnvio;
+        return this;
+    }
+
+    build(){
+        if (!this.msg.usuarioId || !this.msg.idChamado || !this.msg.mensagem) {
+            console.error("Tentativa de construir mensaegm incompleta.");
+            return null;
+        }
+        return this.msg;
+    }
+}
+
+class MsgController {
+    constructor(db, loginController){
+        this.db = db;
+        this.loginController = loginController;
+        this.currentUnsubscribe = null;
+    }
+
+
+    /**
+     * @description Ponto de entrada para anexar listeners aos botões
+     * @param {string} idChamado - O Id do chamado que está sendo resolvido
+     */
+    initEventListeners(idChamado) {
+        const btnEnviarMsg = document.getElementById('enviar-msg');
+        if (btnEnviarMsg){
+            btnEnviarMsg.onclick = () => {
+                this.enviarMensagem(idChamado);
+            };
+        }
+    }
+
+    /**
+     * Envia uma nova mensagem para o Firestore.
+     * @param {string} idChamado - O Id do chamado para o qual a mensagem será enviada.
+     */
+    async enviarMensagem(idChamado){
+        const infos = this.lerMensagem(idChamado);
+
+        if (!infos) {
+            console.warn('Mensagem vazia ou dados de sessão ausentes. Não foi enviado.');
+            return;
+        }
+
+        const mensagem = this.criarMensagem(infos);
+        if(!mensagem){
+            console.log('Erro ao tentar criar o objeto da mensagem.');
+            return;
+        }
+
+        const mensagensCollectionRef = collection(this.db, "chamados", mensagem.idChamado, "mensagens");
+
+        try {
+            let docRef = await addDoc(mensagensCollectionRef, mensagem.toFirestore());
+            console.log('Mensagem Enviada');
+
+            const inputMsg = document.getElementById('escrever-msg');
+            if (inputMsg) 
+                inputMsg.value = '';
+
+        } catch (error){
+            console.error("Erro ao enviar a mensagem para o firestore:", error);
+        }
+    }
+
+    /**
+     * @description Lê os dados do DOM para criar uma mensagem.
+     * @param {string} idChamado - O Id do chamado atual.
+     * @returns {Object | null} Um objeto com os dados ou null se falhar.
+     */
+    lerMensagem(idChamado){
+        const inputMsg = document.getElementById('escrever-msg');
+        const mensagem = inputMsg ? inputMsg.value.trim() : null;
+
+        if(!mensagem){
+            console.error('A mesagem está vazia.');
+            //mostrar um erro visual para o usuário
+            return null;
+        }
+
+        if(!idChamado){
+            console.error('Erro ao tentar ler o id do Chamado.');
+            return null;
+        }
+            
+        const userId = this.loginController.atualUser?.uid;
+        if (!userId) {
+            console.error('Erro ao tentar identificar o uid do usuário.');
+            return null;
+        }
+
+        return {mensagem, idChamado, userId};
+    }
+
+    /**
+     * @description Constrói o objeto Msg usando o MsgBuilder.
+     * @param {Object} infos - O objeto retornado por lerMensagem.
+     * @returns {Msg} O objeto Msg construído.
+     */
+    criarMensagem(infos){
+        const mensagem = new MsgBuilder()
+            .definiridChamado(infos.idChamado)
+            .definirUsuarioId(infos.userId)
+            .definirMensagem(infos.mensagem)
+            .definirDataEnvio(new Date())
+            .build();
+
+        return mensagem;
+    }
+
+    /**
+     * @description Configura o listener (onSnapshot) para carregar e ouvir novas mensagens.
+     * @param {string} idChamado - O Id do chamado que o susário está vendo.
+     */
+    buscarMensagens(idChamado){
+        const chatDisplay = document.getElementById('ver-msg');
+        if (!chatDisplay) {
+            console.error('Não foi possível identificar a área do chat.');
+            return;
+        }
+
+        if (this.currentUnsubscribe) {
+            this.currentUnsubscribe();
+        }
+
+        const mensagensCollectionRef = collection(this.db, "chamados", idChamado, "mensagens");
+
+        const q = query(mensagensCollectionRef, orderBy('dataEnvio', 'asc'));
+
+        this.currentUnsubscribe = onSnapshot(q, (snapshot) => {
+            chatDisplay.innerHTML = '';
+
+            snapshot.forEach((doc) => {
+                const messageData = doc.data();
+
+                if (messageData.dataEnvio && typeof messageData.dataEnvio.toDate === 'function') { //perguntar sobre isso aqui
+                    messageData.dataEnvio = messageData.dataEnvio.toDate();
+                } else {
+                    messageData.dataEnvio = new Date(); //Fallback?
+                }
+
+                this.adicionarMensagem(messageData);
+            });
+
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+
+        }, (error) => {
+            console.error('Erro ao buscar mensagens: ', error);
+        });
+    }
+
+    /**
+     * @description Adiciona as mensagens na tela
+     * @param {Msg} mensagem - A mensagem que buscada no banco de dados do buscarMensagem
+     */
+    adicionarMensagem(mensagem){
+        const chatDisplay = document.getElementById('ver-msg');
+        if (!chatDisplay) {
+            console.error('Não foi possível identificar a área do chat.');
+            return;
+        }
+
+        const currentUserId = this.loginController.atualUser.uid;
+        const isCurrentUser = mensagem.usuarioId === currentUserId;
+
+        const messageWrapper = document.createElement('div');
+        messageWrapper.classList.add('balao-de-fala');
+        messageWrapper.classList.add(isCurrentUser ? 'usuario-atual' : 'outro-usuario');
+
+        const txt = document.createElement('p');
+        txt.classList.add('mensagem-txt');
+        txt.textContent = mensagem.mensagem;
+
+        const dataMsg = document.createElement('span');
+        dataMsg.classList.add('message-time');
+
+        const timeStr = mensagem.dataEnvio && typeof mensagem.dataEnvio.toLocaleString === 'function' ? mensagem.dataEnvio.toLocaleString('pt-BR') : '';
+
+        dataMsg.textContent = timeStr;
+
+        messageWrapper.appendChild(txt);
+        messageWrapper.appendChild(dataMsg);
+        chatDisplay.appendChild(messageWrapper);
+    }
+}
+
+const msgController = new MsgController(db, loginController);
+
+//------------------------------------------------------------------
+//---------------------------GEMINI AI------------------------------
+//------------------------------------------------------------------
+
+//import { ConsultarIA } from "./index.js";
+
+const displayReposta = document.getElementById('resposta-ia');
+if (!displayReposta) {
+    console.error('Não foi possível encontrar o lugar onde enviar as repostas da IA');
+}
+
+const btnConsultarIA = document.getElementById('consultarIA');
+if (btnConsultarIA) {
+    btnConsultarIA.addEventListener('click', () => {
+        const pergunta = document.getElementById('description').textContent;
+
+        ConsultarIA(pergunta, displayReposta);
+    });
+}
+

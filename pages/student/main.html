@@ -183,15 +183,21 @@
                 <hr>
                 <!--Integração com IA-->
                 <div class="ia-box">
-                    <div id="bp-toggle-chat">
-                        <p>Consultar IA</p>
+                    <button id="consultarIA">Consultar IA</button>
+                    <div class="chat-ia">
+                        <p id="resposta-ia"></p>
                     </div>
                 </div>
-                        <!--https://cdn.botpress.cloud/webchat/v3.3/shareable.html?configUrl=https://files.bpcontent.cloud/2025/11/05/01/20251105010738-5JWAHFBJ.json-->
             </div>
             <!--Chat Online-->
             <div class="div-chat ">
+                <div id="ver-msg">
 
+                </div>
+                <div id="controls-chat">
+                    <textarea name="escrever-msg" id="escrever-msg" cols="30" rows="3"></textarea>
+                    <button id="enviar-msg" class="btn "><span class="material-symbols-outlined">send</span></button>
+                </div>
             </div>
         </div>
     </div>

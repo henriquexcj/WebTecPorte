@@ -395,7 +395,7 @@ td p {
     flex-flow: column nowrap;
     width: 50%;
     overflow-y: auto;
-    overflow-x: none;
+    height: auto;
 }
 
 .dados-chamado > h2 {
@@ -451,7 +451,9 @@ td p {
     border-radius: 10px;
     padding: 5px;
     margin-bottom: 10px;
-    overflow-y: auto;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: column nowrap;
 }
 
 #controls-chat {
@@ -477,7 +479,9 @@ td p {
 #enviar-msg {
     flex: 0;
     align-self: center;
-
+    padding: 5px;
+    border: 2px solid var(--texto-2);
+    border-radius: 40%;
 }
 
 main {
@@ -497,6 +501,7 @@ main {
     padding: 5px;
     margin-top: 5px;
     font-weight: normal;
+    font-size: 1em;
 }
 
 .title {
@@ -529,10 +534,14 @@ main {
 
 .ia-box {
     width: 100%;
-    height: 600px;
+    height: 1000px;
     background-color: blue;
-    flex-shrink: 0;
-    flex-basis: 0;
+
+}
+
+.ia-box iframe {
+    width: 100%;
+    height: 100%;
 }
 
 
@@ -540,4 +549,41 @@ main {
     width: 100%;
     height: 200px;
     background-color: blue;
+}
+
+.balao-de-fala {
+    padding: 8px;
+    border: 2px solid var(--texto);
+    border-radius: 5px;
+    flex: 0;
+    margin: 3px 0;
+    max-width: 75%;
+}
+
+.balao-de-fala.usuario-atual {
+    background-color: var(--azul-principal);
+    color: white;
+    border: none;
+}
+
+.balao-de-fala.outro-usuario {
+    background-color: var(--fundo);
+}
+
+.usuario-atual {
+    align-self: flex-end;
+}
+
+.outro-usuario {
+    align-self: flex-start;
+}
+
+.message-txt {
+    color: var(--texto);
+}
+
+.message-time {
+    color: rgb(165, 183, 206);
+    font-size: 0.7em;
+    padding-top: 5px;
 }
