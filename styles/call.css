@@ -179,37 +179,26 @@ td p {
     width: 500px;
 }
 
-.fechado p, .resolvido p, .aguardando-resposta p, .concluido p, .em-andamento p, .aberto p, .baixa p, .media p, .alta p, .urgente p {
+.resolvido p, .em-andamento p, .aberto p, .baixa p, .media p, .alta p, .urgente p {
     border-radius: 15px;
 }
 
-.fechado p {
-
-}
-
-.concluido p {
-    background-color: blue;
-    color: white;
-}
-
 .resolvido p {
-
-}
-
-.aguardando-resposta p {
-
+    background-color: rgb(240, 240, 240);
+    color: var(--cinza);
 }
 
 .em-andamento p {
-    background-color: orange;
-    color: black;
-}
-
-.aberto p{
-    background-color: red;
+    background-color: rgb(0, 123, 255);
     color: white;
 }
 
+.aberto p{
+    background-color: rgb(255, 99, 71);
+    color: white;
+}
+
+/*
 .baixa p{
     background-color: rgb(112, 255, 83);
     color: black;
@@ -229,6 +218,7 @@ td p {
     background-color: rgb(255, 83, 83);
     color: black;
 }
+*/
 
 .newcall-box {
     background-color: var(--fundo);

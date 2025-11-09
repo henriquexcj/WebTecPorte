@@ -557,18 +557,8 @@ class ControllerChamado {
             case 'Em andamento': 
                 td_status.classList.add('em-andamento');
                 break;
-            case 'Aguardando resposta': 
-                td_status.classList.add('aguardando-resposta');
-                break;
             case 'Resolvido': 
                 td_status.classList.add('resolvido');
-                break;
-            case 'Fechado': 
-                td_status.classList.add('fechado');
-                break;
-            case 'Concluído':
-            case 'Concluido':
-                td_status.classList.add('concluido');
                 break;
             default: 
                 console.warn('Erro ao tentar identificar o status.');
