@@ -1,123 +1,110 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 
-import { getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword,
-    signOut
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-import {getFirestore,
-    doc,
-    setDoc,
-    getDoc,
-    addDoc,
-    collection,
-    query,
-    limit,
-    orderBy,
-    getDocs,
-    startAfter,
-    where,
-    onSnapshot,
-    updateDoc,
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-
-
-// Import the functions you need from the SDKs you need
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBG_PNzb1E1kKQT_Tl55oKa9aQJ3LJz6Jw",
-  authDomain: "tecporte-89d32.firebaseapp.com",
-  projectId: "tecporte-89d32",
-  storageBucket: "tecporte-89d32.firebasestorage.app",
-  messagingSenderId: "324186749183",
-  appId: "1:324186749183:web:85e42b67eb766ca86eb4ca"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-export class RegisterController {
+class RegisterController {
     $(id){
-        return document.getElementById(id).value;
+        return document.getElementById(id);
     }
 
     async execute(){
-        this.user = this.pickupData();
-        if (!this.user) return;
+        const user = this.pickupData();
+        if (!user) return;
+        console.log('objeto do usuario criado com sucesso');
+        
+        const btn = this.$('btn_cadastrar');
+        if (btn) btn.disabled = true;
+
+        this.addOnDB(user);
+
+        if (btn) btn.disabled = true;
+    }
+
+    async addOnDB(user){
+        const novoUsuario = {
+            nome: user.nome,
+            email: user.email,
+            senha: user.senha,
+            papel: user.papel
+        };
+        console.log('informações do objeto recuperadas', novoUsuario);
         
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, this.user.email, this.user.senha);
-            
-            const user = userCredential.user;
+            const resposta = await fetch("https://localhost:5051/api/Auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(novoUsuario)
+        });
 
-            await setDoc(doc(db, "users", user.uid), {
-                nome: this.user.nome,
-                email: this.user.email,
-                curso: this.user.curso || null,
-                dataCadastro: this.user.dataCadastro,
-                papel: this.user.papel
-            }); 
+        if(!resposta.ok){
+            const erro = await resposta.text();
+            console.error("Erro ao registar: ", erro);
+            //document.getElementById('mensagem').textContent = "Erro ao registrar: " + erro;
+            alert("Erro ao registrar: " + erro)
+            return;
+        }
 
-            alert('Conta criada e salva com sucesso!');
-        } catch (error){
-            let mensagemErro = "Ocorreu um erro desconhecido.";
-        
-            switch(error.code) {
-                case 'auth/email-already-in-use':
-                    mensagemErro = 'O e-mail fornecido já está em uso.';
-                    break;
-                case 'auth/weak-password':
-                    mensagemErro = 'A senha deve ter pelo menos 6 caracteres.';
-                    break;
-                default:
-                    mensagemErro = error.message;
-            }
-            console.error("Erro ao criar conta:", error.code, error.message);
-            alert(`Erro ao cadastrar: ${mensagemErro}`);
+        const data = await resposta.json();
+        console.log(data);
+        this.limparCampos();
+        //document.getElementById('mensagem').textContent = "Usuário resgistrado com sucesso!";
+        alert("Usuário resgistrado com sucesso!");
+        } catch (erro) {
+            console.error("Erro de conexão: ", erro);
+            //document.getElementById('mensagem').textContent = "Falha ao conectar com o servidor.";
+            alert("Falha ao conectar com o servidor.");
         }
     }
 
     pickupData(){
-        this.nome = this.$('nomecompleto');
-        this.curso = this.$('curso');
-        this.email = this.$('c_email');
-        this.senha1 = this.$('c_senha');
-        this.senha2 = this.$('c_confirmar_senha');
+        const nome = this.$('nomecompleto').value;
+        const curso = this.$('curso').value;
+        const email = this.$('c_email').value;
+        const senha1 = this.$('c_senha').value;
+        const senha2 = this.$('c_confirmar_senha').value;
         
-        if(this.verifyPassword(this.senha1, this.senha2))
-            return this.newUser();
-        return;
+        if(this.verifyPassword(senha1, senha2)){
+            if (curso){
+                return this.newUser({nome: nome, email: email, curso: curso, senha: senha1});
+            } else {
+                return this.newUser({nome: nome, email: email, senha: senha1});
+            }
+        }
+        return null;
     }
 
     verifyPassword(senha1, senha2){
-        if (senha1 == senha2)
+        if (senha1 === senha2)
             return true;
 
+        //document.getElementById('mensagem').textContent = "Senhas diferentes, tente novamente.";
         alert('As senhas são diferentes, escreva de novo.');
         return false;
     }
 
-    newUser(){
-        let user = new UserBuilder()
-        .definirNome(this.nome)
-        .definirCurso(this.curso)
-        .definirEmail(this.email)
-        .definirSenha(this.senha2)
-        .definirPapel('Funcionário')
-        .definirDataCadastro(new Date())
-        .Build();
+    newUser(data){
+        const userBuilder =  new UserBuilder()
+            .definirNome(data.nome)
+            .definirEmail(data.email)
+            .definirSenha(data.senha)
+            .definirDataCadastro(new Date());
+        
+        if(data.curso)
+            userBuilder.definirPapel('Aluno')
+                .definirCurso(data.curso)
+        else
+            userBuilder.definirPapel('Funcionario');
 
-        return user;
+
+        return userBuilder.Build();
     }
 
+    limparCampos(){
+        this.$('nomecompleto').value = '';
+        this.$('c_email').value = '';
+        this.$('curso').value = "";
+        this.$('c_senha').value = '';
+        this.$('c_confirmar_senha').value = '';
+    }
 }
 
 class LoginController {
@@ -129,55 +116,91 @@ class LoginController {
     }
 
     async execute(){
-        if (this.pickupInfo()){
-            await this.verifyAccount();
+        const login = this.pickupInfo()
+        if (login){
+            await this.verifyAccount(login.email, login.senha);
+
             if (this.atualUser){
                 this.redirect(this.atualUser.papel);
-                let changeText = new ChangeText();
-                changeText.changeText(this.atualUser);
             }
             else
                 console.log('Login ok, mas não está carregando os dados.');
         }
     }
     
+    
     pickupInfo(){
-        this.email = this.$('email');
-        this.senha = this.$('loginPass');
+        const email = this.$('email');
+        const senha = this.$('loginPass');
 
-        if (!this.email || !this.senha){
+        if (!email || !senha){
             alert('Por favor, preencha e-mail e senha.')
-            return false;
+            return null;
         }
-        return true;
+        return {email: email, senha: senha};
     }
 
-    async verifyAccount(){
+    decodeJWT(token) {
+        try {
+            if (!token) {
+                console.warn("Token não encontrado no localStorage.");
+                return null;
+            }
+
+            const payload = token.split('.')[1];
+            const decoded = JSON.parse(atob(payload));
+
+            return {
+                email: decoded.email || decoded.sub,
+                papel: decoded.papel || decoded.role,
+                id: decoded.id
+            };
+        } catch (erro) {
+            console.error("Erro ao decodificar o token JWT: ", erro);
+            return null;
+        }
+    }
+
+    async verifyAccount(email, senha){
+        //document.getElementById('mensagem').textContent = "Aguarde..."
         try{
-            console.log('Tentando fazer login com: ', this.email);
+            console.log('Tentando fazer login com: ', email);
             
-            const userCredential = await signInWithEmailAndPassword(auth, this.email, this.senha);
+            const resposta = await fetch("https://localhost:5051/api/Auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({email, senha})
+            });
 
-            const user = userCredential.user;
-            console.log('Login bem-sucedido! UID: ', user.uid);
-            alert('Login realizado com sucesso! Redirecionando...')
-            
-            await this.pickupDataOnDB(user.uid);
-            
+            if (!resposta.ok) {
+                const erro = await resposta.text();
+                throw new Error(erro);
+            }
+
+            const data = await resposta.json();
+
+            localStorage.setItem("token", data.token);
+            //document.getElementById('mensagem').textContent = "Login realizado com sucesso!";
+
+            const userData = this.decodeJWT(data.token);
+            if (userData) {
+                this.atualUser = userData;
+            } else {
+                console.warn("Token inválido ou sem dados de usuário.");
+            }
+
+            //await this.pickupDataOnDB(user.uid);
         } catch (error) {
-            console.error('Deu erro no login', error.code, error.message);
-
-            let mensagemErro = 'Ocorreu um erro ao tentar fazer login.';
-
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential')
-                mensagemErro = 'E-mail ou senha incorretos. Tente novamente.';
-            
-            alert(mensagemErro);
+            console.error('Erro no login: ', error);
+            document.getElementById('mensagem').textContent = 'Erro: ' + error.message;
         }
     }
 
     redirect(papel){
         switch(papel){
+            case 'Funcionario':
             case 'Funcionário': 
                 window.location.href = '/pages/employee/main.html';
                 break;
@@ -186,83 +209,40 @@ class LoginController {
                 break;
             default: 
                 console.log('Erro ao redirecionar a página.');
+                window.location.href = '../pages/login.html'
                 break;
         }
     }
 
-    async pickupDataOnDB(uid){
-        try {
-            const docSnap = await getDoc(doc(db, "users", uid));
-            if(docSnap.exists()){
-                console.log("Dados do usuário encontrados: ", docSnap.data());
-
-                const {
-                    nome,
-                    curso,
-                    dataCadastro,
-                    email,
-                    papel,
-                } = docSnap.data();
-
-                this.atualUser = new UserBuilder()
-                    .definirNome(nome)
-                    .definirEmail(email)
-                    .definirCurso(curso)
-                    .definirPapel(papel)
-                    .definirDataCadastro(dataCadastro)
-                    .definirUid(uid)
-                    .Build();
-
-                console.log(this.atualUser);
-                console.log(this.atualUser.papel);
-
-                localStorage.setItem('perfilUsuarioTecPorte', JSON.stringify(this.atualUser));
-
-                return docSnap.data();
-
-            } else {
-                console.log("Nenhum documento de perfil encontrado para este usuário!");
-                return null;
-            }
-        } catch (error) {
-            console.error("Erro ao buscar dados do Firestore: ", error);
-            return null;
-        }
-    }
-
     verifyLocalStorage(){
-        let user = localStorage.getItem('perfilUsuarioTecPorte');
+        const userData = this.decodeJWT(localStorage.getItem('token'));
+        
         const currentPath = window.location.pathname;
-        if(user){
-            this.atualUser = JSON.parse(user);            
+
+        if(userData){
+            this.atualUser = userData;       
             console.log('Usuário recuperado do localStorage', this.atualUser);
+                //se o usuário possui dados ele será direcionado para usa página, fazendo um login automatico
             if (currentPath.includes('login.html') || currentPath.includes('cadastro.html'))
                 this.redirect(this.atualUser.papel);
+
+            //mantém um Aluno nas páginas de aluno
             if (this.atualUser.papel === 'Aluno' && (!currentPath.includes('student') && !currentPath.includes('redefinirSenhar.html')))
                 this.redirect(this.atualUser.papel);
+
+            //matém um Funcionario nas páginas de Funcionario
             if (this.atualUser.papel === 'Funcionário' && (!currentPath.includes('employee') && !currentPath.includes('redefinirSenhar.html')))
                 this.redirect(this.atualUser.papel);
-        }
+
+        } //Se o usuário não houver dados ele será direcionado para as páginas de login
         else if (!currentPath.includes('/login.html') && !currentPath.includes('/cadastro.html') && !currentPath.includes('/redefinirSenha.html'))
             window.location.href = '/pages/login.html';
     }
 
     async logout() {
-        try {
-            localStorage.removeItem('perfilUsuarioTecPorte');
-            console.log('Dados do perfil removidos do localStorage.');
-
-            await signOut(auth);
-            console.log('Sessão do Firebase encerrada com sucesso.');
-
-            window.location.href = '/pages/login.html';
-        } catch (error) {
-            console.error('Erro durante o logout: ', error);
-            alert('Ocorreu um erro ao tentar fazer logout. Tente Novamente.');
-            
-            localStorage.removeItem('perfilUsuarioTecPorte');
-            window.location.href = '/pages/login.html';
-        }
+        localStorage.removeItem('token');
+        console.log('Sessão encerrada');
+        this.redirect(null);
     }
 }
 
@@ -309,8 +289,8 @@ class UserBuilder {
         return this;
     }
 
-    definirUid(uid){
-        this.user.uid = uid;
+    definirId(id){
+        this.user.id = id;
         return this;
     }
 
@@ -322,7 +302,7 @@ class UserBuilder {
 const registerController = new RegisterController();
 const loginController = new LoginController();
 
-const btnCadastro = document.querySelector('.btn_cadastrar');
+const btnCadastro = document.getElementById('btn_cadastrar');
 if (btnCadastro){
     btnCadastro.addEventListener('click', async (event) =>{
         event.preventDefault();
@@ -356,7 +336,7 @@ loginController.verifyLocalStorage();
  */
 class Chamado {
     constructor(){
-        this.idChamado = null;
+        this.id = null;
         this.userID = null;
         this.nomeAluno = '';
         this.raAluno = '';
@@ -365,27 +345,10 @@ class Chamado {
         this.status = 'Aberto'; //valor padrão
         this.prioridade = 'Baixa'; //valor padrão
         this.categoria = '';
-        this.tituloChamado = '';
-        this.descricaoChamado = '';
+        this.titulo = '';
+        this.descricao = '';
         this.dataCriacao = new Date(); //valor padrão
         this.dataAtualizacao = new Date(); //valor padrão
-    }
-
-    toFirestore(){
-        return {
-            userID: this.userID,
-            nomeAluno: this.nomeAluno,
-            raAluno: this.raAluno,
-            emailAluno: this.emailAluno,
-            curso: this.curso,
-            status: this.status,
-            prioridade: this.prioridade,
-            categoria: this.categoria,
-            tituloChamado: this.tituloChamado,
-            descricaoChamado: this.descricaoChamado,
-            dataCriacao: this.dataCriacao,
-            dataAtualizacao: this.dataAtualizacao
-        };
     }
 }
 
@@ -416,8 +379,8 @@ class BuilderChamado {
         return this;
     }
 
-    definirUserId(userId){
-        this.chamado.userID = userId;
+    definirUsuarioId(usuarioId){
+        this.chamado.usuarioId = usuarioId;
         return this;
     }
 
@@ -431,8 +394,8 @@ class BuilderChamado {
         return this;
     }
 
-    definirId(idChamado){ //Pegar do banco de dados
-        this.chamado.idChamado = idChamado;
+    definirId(id){ //Pegar do banco de dados
+        this.chamado.id = id;
         return this;
     }
 
@@ -447,17 +410,44 @@ class BuilderChamado {
     }
 
     definirCategoria(categoria){
-        this.chamado.categoria = categoria;
+        let categoriaID;
+        switch (categoria){
+            case 'Acesso': 
+                categoriaID = 1;
+                break;
+            case 'Financeiro':
+                categoriaID = 2;
+                break;
+            case 'Email': 
+                categoriaID = 3;
+                break; 
+            case 'Rede':
+                categoriaID = 4;
+                break;
+            case 'Hardware':
+                categoriaID = 5;
+                break;
+            case 'Software':
+                categoriaID = 6;
+                break;
+            case 'Outros':
+                categoriaID = 7;
+                break;
+            default:
+                console.error('Categoria não identificada');
+                return;
+        }
+        this.chamado.categoriaID = categoriaID;
         return this;
     }
 
-    definirTituloChamado(tituloChamado){
-        this.chamado.tituloChamado = tituloChamado;
+    definirTitulo(titulo){
+        this.chamado.titulo = titulo;
         return this;
     }
 
-    definirDescricaoChamado(descricaoChamado){
-        this.chamado.descricaoChamado = descricaoChamado;
+    definirDescricao(descricao){
+        this.chamado.descricao = descricao;
         return this;
     }
 
@@ -502,19 +492,16 @@ class ControllerChamado {
         let categoria = this.selectValueByid('formCategoria');
         let raAluno = this.selectValueByid('ra');
         let curso = this.selectValueByid('studentArea');
-        let tituloChamado = this.selectValueByid('call-title');
-        let prioridade = this.definirPrioridade(tituloChamado);
+        let titulo = this.selectValueByid('call-title');
+        let prioridade = this.definirPrioridade(titulo);
         let description = this.selectValueByid('formDescription');
 
         let builderChamado = new BuilderChamado();
-        builderChamado.definirAluno(nomeAluno)
-            .definirRaAluno(raAluno)
-            .definirEmail(emailAluno)
-            .definirCurso(curso)
+        builderChamado
+            .definirUsuarioId(loginController.atualUser.id)
             .definirCategoria(categoria)
-            .definirTituloChamado(tituloChamado)
-            .definirDescricaoChamado(description)
-            .definirUserId(loginController.atualUser.uid)
+            .definirTitulo(titulo)
+            .definirDescricao(description)
             .definirPrioridade(prioridade);
 
         return builderChamado.Build();
@@ -537,15 +524,15 @@ class ControllerChamado {
         let td_status = tr.insertCell();
         let td_prioridade = tr.insertCell();
         let td_idChamado = tr.insertCell();
-        let td_data = tr.insertCell();
+        let td_dataCriacao = tr.insertCell();
         let td_dataAtualizacao = tr.insertCell();
         //let td_acoes = tr.insertCell();
 
-        td_titulo.innerHTML = `<p>${chamado.tituloChamado}</p>`;
+        td_titulo.innerHTML = `<p>${chamado.titulo}</p>`;
         td_status.innerHTML = `<p>${chamado.status}</p>`;
         td_prioridade.innerHTML = `<p>${chamado.prioridade}</p>`;
-        td_idChamado.innerHTML = `<p>${chamado.idChamado}</p>`;
-        td_data.innerHTML = `<p>${chamado.dataCriacao.toLocaleString('pt-BR')}</p>`;
+        td_idChamado.innerHTML = `<p>${chamado.id}</p>`;
+        td_dataCriacao.innerHTML = `<p>${chamado.dataCriacao.toLocaleString('pt-BR')}</p>`;
         td_dataAtualizacao.innerHTML = `<p>${chamado.dataAtualizacao.toLocaleString('pt-BR')}</p>`;
         
         td_titulo.classList.add('left');
@@ -585,26 +572,51 @@ class ControllerChamado {
     }
 
     async createChamado(){
+        const token = localStorage.getItem('token');
+
         let chamado = this.coletarDados();
+        
         if (!chamado) {
             console.error('sem chamado!?');
             return;
         }
-        const chamadosCollectionRef = collection(db, "chamados");
-        if (!chamadosCollectionRef){
-            console.error('Amigão não deu certo essa conexão com o banco ai');
-            return;
-        }
+
+        const chamadoFormatado = {
+            UsuarioID: chamado.usuarioId,
+            CategoriaID: chamado.categoriaID,
+            Titulo: chamado.titulo,
+            Descricao: chamado.descricao,
+            Status: chamado.status,
+            Prioridade: chamado.prioridade
+        };
 
         try {
-            let docRef = await addDoc(chamadosCollectionRef, chamado.toFirestore()); 
-            console.log('Id do chamado: ', docRef.id);
-            
-        } catch (error){
-            console.error("Erro ao adicionar o chamado:", error);
-        }
+            const resposta = await fetch("https://localhost:5051/api/Chamados", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(chamadoFormatado)
+            });
 
-        this.CarregarChamados();
+            if (!resposta.ok) {
+                const erro = await resposta.json();
+                console.error("Erro no servidor: ", erro);
+                throw new Error(erro.error || "Erro ao criar chamado");
+            }
+
+            const data = await resposta.json();
+            console.log("Chamado criado: ", data);
+            //document.getElementById('mensagem').textContent = "Chamado criado com secesso!";
+            alert("Chamado criado com sucesso!");
+
+            this.CarregarChamados();
+        } catch (erro) {
+            console.error("Erro ao criar chamado: ", erro);
+            //document.getElementById('mensagem').textContent = erro.message;
+            alert(erro.message)
+        }
     }
 
     clearTable(){
@@ -612,44 +624,38 @@ class ControllerChamado {
         tbody.innerText = '';
     }
 
-    async CarregarChamados(startAfterDoc = null){
+    async CarregarChamados(){
         this.clearTable();
 
-        const PAGE_SIZE = 10;
+        const token = localStorage.getItem('token');
 
-        const chamadosCollectionRef = collection(db, "chamados");
-
-        let q;
-        if (loginController.atualUser.papel == 'Aluno'){
-            if (startAfterDoc)
-                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.atualUser.uid), startAfter(startAfterDoc), limit(PAGE_SIZE));
-            else
-                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), where('userID', '==', loginController.atualUser.uid), limit(PAGE_SIZE));
-        } else {
-            if (startAfterDoc) 
-                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), startAfter(startAfterDoc), limit(PAGE_SIZE));
-            else
-                q = query(chamadosCollectionRef, orderBy('dataCriacao', 'desc'), limit(PAGE_SIZE));
-        }
-            
         try {
-            const querySnaptshot = await getDocs(q);
-
-            querySnaptshot.forEach((doc) => {
-                const dados = doc.data();
-                dados.idChamado = doc.id;
-                dados.dataCriacao = dados.dataCriacao.toDate();
-                dados.dataAtualizacao = dados.dataAtualizacao.toDate();
-                this.adicionar(dados);
+            const resposta = await fetch("https://localhost:5051/api/Chamados", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
 
-            const isLastPage = querySnaptshot.docs.length < PAGE_SIZE;
-            const nextCursor = isLastPage ? null : querySnaptshot.docs[querySnaptshot.docs.length - 1];
+            if (!resposta.ok) throw new Error("Erro ao carregar chamados");
 
-            return { nextCursor, isLastPage };
-        } catch (error) {
-            console.error("Erro ao buscar chamados:", error);
-            return {nextCursor: null, isLastPage: true};
+            const data = await resposta.json();
+            data.forEach(ch => {
+                const chamadoAdaptado = {
+                    id: ch.id,
+                    titulo: ch.titulo,
+                    descricao: ch.descricao,
+                    prioridade: ch.prioridade,
+                    status: ch.status,
+                    dataCriacao: new Date(ch.dataCriacao),
+                    dataAtualizacao: ch.dataAtualizacao 
+                };
+                this.adicionar(chamadoAdaptado);
+            });
+            console.log('Chamados carregados');
+        } catch (erro) {
+            console.error('Erro ao carregar chamados: ', erro);
+            //document.getElementById('mensagem').textContent = 'Erro ao buscar chamados: ' + erro.message;
+            alert('Erro ao buscar chamados: ' + erro.message);
         }
     }
 
@@ -683,16 +689,16 @@ class ControllerChamado {
         }
         this.chamado = chamado;
         this.verificarResolvido(chamado);
-        document.getElementById('tituloChamado').textContent = chamado.tituloChamado;
+        document.getElementById('tituloChamado').textContent = chamado.titulo;
         document.getElementById('nomeAluno').textContent = chamado.nomeAluno;
         document.getElementById('raAluno').textContent = chamado.raAluno;
         document.getElementById('cursoAluno').textContent = chamado.curso; //Esse tem que mudar pra ficar bonitinho na vizualização;
         document.getElementById('emailAluno').textContent = chamado.emailAluno;
-        document.getElementById('idChamado').textContent = chamado.idChamado;
-        document.getElementById('categoria').textContent = chamado.categoria;
+        document.getElementById('idChamado').textContent = chamado.id;
+        document.getElementById('categoria').textContent = chamado.categoriaID;
         document.getElementById('status').textContent = chamado.status;
         document.getElementById('prioridade').textContent = chamado.prioridade;
-        document.getElementById('description').textContent = chamado.descricaoChamado;
+        document.getElementById('description').textContent = chamado.descricao;
 
         detailChamadoBox.classList.toggle('active');
         window.onclick = (event) => {
@@ -702,8 +708,8 @@ class ControllerChamado {
         }
 
         
-        msgController.buscarMensagens(chamado.idChamado);
-        msgController.initEventListeners(chamado.idChamado);
+        msgController.buscarMensagens(chamado.id);
+        msgController.initEventListeners(chamado.id);
     }
 
     definirPrioridade(titulo){
@@ -742,12 +748,12 @@ class ControllerChamado {
     }
 
     async atualizarChamado(status = null){
-        if (!this.chamado?.idChamado) {
-            console.error("Erro: idChamado não definido!");
+        if (!this.chamado?.id) {
+            console.error("Erro: id não definido!");
             return;
         }
 
-        const chamadosCollectionRef = doc(db, `chamados/${this.chamado.idChamado}`);
+        const chamadosCollectionRef = doc(db, `chamados/${this.chamado.id}`);
 
         try {
             if (status) {
@@ -788,7 +794,7 @@ class ControllerChamado {
 
     abrirBtnFinalizarCadastro(){
         const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
-        if (btnFinalizarCadastro){
+        if (btnFinalizarCadastro && btnFinalizarCadastro.classList.contains('resolvido-config')){
             btnFinalizarCadastro.classList.remove('resolvido-config');
         }
     }
@@ -802,7 +808,7 @@ class ControllerChamado {
 
     abrirControlesDoChat(){
         const controlsChat = document.getElementById('controls-chat');
-        if (controlsChat){
+        if (controlsChat && controlsChat.classList.contains('resolvido-config')){
             controlsChat.classList.remove('resolvido-config');
         }
     }
@@ -816,7 +822,7 @@ class ControllerChamado {
 
     abrirChatIA(){
         const iaBox = document.querySelector('.ia-box');
-        if (iaBox) {
+        if (iaBox && iaBox.classList.contains('resolvido-config')) {
             iaBox.classList.remove('resolvido-config');
         }
     }
@@ -848,7 +854,7 @@ if (btnCancelCall){
     btnCancelCall.addEventListener('click', () => {
         document.getElementById('studentName').value = '';
         document.getElementById('studentEmail').value = '';
-        document.getElementById('categoria').value = '';
+        document.getElementById('fromCategoria').value = '';
         document.getElementById('ra').value = '';
         document.getElementById('studentArea').value = '';
         //document.getElementById('priority').value = '';
@@ -860,11 +866,11 @@ if (btnCancelCall){
 const tbody = document.getElementById('tbody');
 if (tbody){
     document.addEventListener('DOMContentLoaded', async () => {
-        const { nextCursor, isLastPage } = await controllerChamado.CarregarChamados();
+        //const { nextCursor, isLastPage } = await controllerChamado.CarregarChamados();
 
-        controllerChamado.cursorHistory.push(nextCursor);
+        //controllerChamado.cursorHistory.push(nextCursor);
 
-        controllerChamado.atualizarControles(isLastPage);
+        //controllerChamado.atualizarControles(isLastPage);
     });
 }
 
@@ -941,8 +947,8 @@ if (btnFinalizarCadastro) {
 class ChangeText{
     changeText(user){
         const elementProfileName = document.getElementById('pg_name');
-        if (elementProfileName && user.nome)
-            elementProfileName.textContent = user.nome;
+        if (elementProfileName && user.email)
+            elementProfileName.textContent = user.email;
         else 
             elementProfileName.textContent = 'Error Name'
 
@@ -1081,9 +1087,9 @@ class MsgController {
             return null;
         }
             
-        const userId = this.loginController.atualUser?.uid;
+        const userId = this.loginController.atualUser?.id;
         if (!userId) {
-            console.error('Erro ao tentar identificar o uid do usuário.');
+            console.error('Erro ao tentar identificar o id do usuário.');
             return null;
         }
 
@@ -1158,7 +1164,7 @@ class MsgController {
             return;
         }
 
-        const currentUserId = this.loginController.atualUser.uid;
+        const currentUserId = this.loginController.atualUser.id;
         const isCurrentUser = mensagem.usuarioId === currentUserId;
 
         const messageWrapper = document.createElement('div');
@@ -1182,7 +1188,7 @@ class MsgController {
     }
 }
 
-const msgController = new MsgController(db, loginController);
+//const msgController = new MsgController(db, loginController);
 
 //------------------------------------------------------------------
 //---------------------------GEMINI AI------------------------------
