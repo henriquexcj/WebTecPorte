@@ -64,7 +64,7 @@ main table {
 
 
 
-.btn_filter{
+.btn_refresh{
     border-radius: 5px;
     width: 35px;
     height: 35px;
@@ -76,10 +76,10 @@ main table {
     align-items: center;
     font-size: 30px;
 }
-    .btn_filter:hover {
+    .btn_refresh:hover {
         box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.4);
     }
-    .btn_filter:active {
+    .btn_refresh:active {
         box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.4) inset;
     }
 

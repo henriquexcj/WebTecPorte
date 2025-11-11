@@ -35,11 +35,14 @@ html, body {
 
 main {
     width: 100%;
-    max-width: 1200px;
     height: calc(100% - 72px);
     background-color: var(--fundo);
     color: var(--texto);
     margin: auto;
+}
+
+.main-view > div {
+    width: 100%;
 }
 
 main h1 {
@@ -103,7 +106,7 @@ header{
 nav {
     background-color: var(--azul-principal);
     width: 80%;
-    max-width: 400px;
+    max-width: 330px;
     height: 100%;
 
     display: flex;
@@ -184,6 +187,7 @@ nav > hr {
     flex-flow: row nowrap;
     align-items: center;
     padding: 5px 10px;
+    cursor: pointer;
 }
 
 .settings span a{
@@ -269,6 +273,13 @@ nav > hr {
     .btn:active {
         box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.4) inset;
     }
+
+
+.main-view {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
 
 .none {
     display: none;

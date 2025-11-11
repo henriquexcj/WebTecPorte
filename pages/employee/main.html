@@ -16,55 +16,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
-    <nav>
-        <!--Informações do Usuário exibidas no sidebar-->
-        <div class="profile">
-            <div class="info-name">
-                <h5 id="pg_name"></h5>
-                <h5 id="pg_function"></h5>
-            </div>
-            <span class="material-symbols-outlined close-nav">close</span>
-        </div>
-        <hr>
-        <!--Outras opções no sidebar-->
-        <div class="nav_options">
-            <a href="main.html">Chamados</a>
-            <div class="user_calls">
-                <table>
-                    <p>Seus Chamados: </p>
-                <a href=""></a>
-                </table>
-            </div>
-        </div>
-        
-        <!--Configurações-->
-        <div class="settings">
-            <hr>
-            <!--Opção que faz surgir o Popup de configurações-->
-            <span class="btn-settings">
-                <img src="../../images/settings_24dp.png" alt="Ícone de Configurações">
-                <a href="#">Configurações</a>
-            </span>
-            <!--Opção que faz o usuário sair da tela (logout)-->
-            <span class="btn-logout">
-                <img src="../../images/logout_24dp.png" alt="Ícone para sair">
-                <a href="../../index.html">Sair</a> <!--Retirar os dados da conta logada-->
-                <!--Lembra que tem que incluir um sistema de verificação, assim toda vez que o usuário acessar uma página esse sistema verifica se tem uma conta logada, se não ele é redirecionado para a tela ed login.
-                É uma segurança caso o usuário aperte para sair da conta, mas se ele apertar na setinha para voltar, ele irá na mesma página de antes mesmo sem estar logado.-->
-            </span>
-        </div>
-    </nav>
+    
 
     <!--Popup de opções da configuração-->
-    <div class="light-mode settings-itens">
+    <!--<div class="light-mode settings-itens">
         <span class="material-symbols-outlined close-settings">close</span>
         <hr>
         <ul>
             <li class="change-theme">Mudar tema</li>
-            <!--<li>Configurações</li>-->
+            <li>Configurações</li>
             <li>Redefinir senha</li>
         </ul>
-    </div>
+    </div>-->
 
     <!--Popup para criar novos intens para a tabela-->
     <div class="newcall-box light-mode">
@@ -163,14 +126,14 @@
                     <h3 class="title-dados">E-mail</h3>
                     <p class="dados" id="emailAluno"></p>
                 </div>
-                <div class="inteiro">
-                    <h3 class="title-dados">ID Chamado</h3>
-                    <p class="dados" id="idChamado"></p>
-                </div>
                 <div class="dividido">
                     <div>
                         <h3 class="title-dados">Categoria</h3>
                         <p class="dados" id="categoria"></p>
+                    </div>
+                    <div>
+                        <h3 class="title-dados">ID Chamado</h3>
+                        <p class="dados" id="idChamado"></p>
                     </div>
                 </div>
                 <div class="dividido">
@@ -205,44 +168,89 @@
         </div>
     </div>
 
-    <header>
-        <div class="menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </header>
-    <main class="light-mode">
-        <h1>Chamados</h1>
-        <hr>
-        <div class="table_controls">
-            <div class="btn_filter">
-                <span class="material-symbols-outlined">filter_alt</span>
+    
+    <div class="main-view">
+        <nav>
+            <!--Informações do Usuário exibidas no sidebar-->
+            <div class="profile">
+                <div class="info-name">
+                    <h5 id="pg_name"></h5>
+                    <h5 id="pg_function"></h5>
+                </div>
+                <span class="material-symbols-outlined close-nav">close</span>
             </div>
-            <!--<input type="button" value="+ Chamado" class=" btn btn_newcall pushnewcallbox">-->
+            <hr>
+            <!--Outras opções no sidebar-->
+            <div class="nav_options">
+                <!--<a href="main.html">Chamados</a>
+                <div class="user_calls">
+                    <table>
+                        <p>Seus Chamados: </p>
+                    <a href=""></a>
+                    </table>
+                </div>-->
+            </div>
+        
+            <!--Configurações-->
+            <div class="settings">
+                <hr>
+                <!--Opção que faz surgir o Popup de configurações-->
+                <span class="btn-change-theme"> <!--btn-settings-->
+                    <!--<img src="../../images/settings_24dp.png" alt="Ícone de Configurações">
+                    <a href="#">Configurações</a>-->
+                    <img src="../../images/contrast_24dp.png" alt="Ícone para mudar o tema">
+                    <a class="change-theme">Mudar tema</a>
+                </span>
+                <!--Opção que faz o usuário sair da tela (logout)-->
+                <span class="btn-logout">
+                    <img src="../../images/logout_24dp.png" alt="Ícone para sair">
+                    <a href="../../index.html">Sair</a> <!--Retirar os dados da conta logada-->
+                </span>
+            </div>
+        </nav>
+        <div>
+            <header>
+                <div class="menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </header>
+            <main class="light-mode">
+                <h1>Chamados</h1>
+                <hr>
+                <div class="table_controls">
+                    <div class="btn_refresh">
+                        <span class="material-symbols-outlined">refresh</span>
+                    </div>
+                    <!--<input type="button" value="+ Chamado" class=" btn btn_newcall pushnewcallbox">-->
+                </div>
+                <div class="box-chamados">
+                    <table class="table_calls">
+                        <thead id="thead">
+                            <tr>
+                                <th class="titulo">Título</th>
+                                <th>Status</th>
+                                <th>Prioridade</th>
+                                <th>ID Chamado</th>
+                                <th>Data</th>
+                                <th>Última atualização</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                        </tbody>
+                    </table>
+                </div>
+                <!--
+                <div class="paginacao-controles">
+                    <button class="btn btn-table" id="btn-return-table">Anterior</button>
+                    <span id="page-table">1</span>
+                    <button class="btn btn-table" id="btn-next-table">Próximo</button>
+                </div>
+                -->
+            </main>
         </div>
-        <div class="box-chamados">
-            <table class="table_calls">
-                <thead id="thead">
-                    <tr>
-                        <th class="titulo">Título</th>
-                        <th>Status</th> 
-                        <th>Prioridade</th> 
-                        <th>ID Chamado</th>
-                        <th>Data</th>
-                        <th>Última atualização</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody">
-                </tbody>
-            </table>
-        </div>
-        <div class="paginacao-controles">
-            <button class="btn btn-table" id="btn-return-table">Anterior</button>
-            <span id="page-table">1</span>
-            <button class="btn btn-table" id="btn-next-table">Próximo</button>
-        </div>
-    </main>
+    </div>
     <!--Script-->
     <script src="../../script/menu.js"></script>
     <script type="module" src="../../script/manageAcounts.js"></script>

@@ -221,7 +221,7 @@ class LoginController {
 
         if(userData){
             this.atualUser = userData;       
-            console.log('Usuário recuperado do localStorage', this.atualUser);
+            //console.log('Usuário recuperado do localStorage', this.atualUser);
                 //se o usuário possui dados ele será direcionado para usa página, fazendo um login automatico
             if (currentPath.includes('login.html') || currentPath.includes('cadastro.html'))
                 this.redirect(this.atualUser.papel);
@@ -337,7 +337,7 @@ loginController.verifyLocalStorage();
 class Chamado {
     constructor(){
         this.id = null;
-        this.userID = null;
+        this.usuarioId = null;
         this.nomeAluno = '';
         this.raAluno = '';
         this.emailAluno = '';
@@ -487,8 +487,6 @@ class ControllerChamado {
     }
 
     coletarDados(){
-        let nomeAluno = this.selectValueByid('studentName');
-        let emailAluno = this.selectValueByid('studentEmail');
         let categoria = this.selectValueByid('formCategoria');
         let raAluno = this.selectValueByid('ra');
         let curso = this.selectValueByid('studentArea');
@@ -638,18 +636,20 @@ class ControllerChamado {
 
             if (!resposta.ok) throw new Error("Erro ao carregar chamados");
 
-            const data = await resposta.json();
+            const data = await resposta.json();            
             data.forEach(ch => {
                 const chamadoAdaptado = {
                     id: ch.id,
                     titulo: ch.titulo,
                     descricao: ch.descricao,
                     prioridade: ch.prioridade,
+                    categoriaID: ch.categoriaID,
                     status: ch.status,
+                    usuarioId: ch.usuarioID,
                     dataCriacao: new Date(ch.dataCriacao),
-                    dataAtualizacao: ch.dataAtualizacao 
+                    dataAtualizacao: new Date(ch.dataAtualizacao)
                 };
-                this.adicionar(chamadoAdaptado);
+                this.adicionar(chamadoAdaptado);                
             });
             console.log('Chamados carregados');
         } catch (erro) {
@@ -681,35 +681,49 @@ class ControllerChamado {
         }
     }
 
-    abrirDetalhesDoChamado(chamado){
+    async abrirDetalhesDoChamado(chamado){
         const detailChamadoBox = document.querySelector('.details-chamado');
         if (!detailChamadoBox) {
             console.error('Não foi encontrado o Popup de detalhes do chamado.');
             return;
         }
-        this.chamado = chamado;
-        this.verificarResolvido(chamado);
-        document.getElementById('tituloChamado').textContent = chamado.titulo;
-        document.getElementById('nomeAluno').textContent = chamado.nomeAluno;
-        document.getElementById('raAluno').textContent = chamado.raAluno;
-        document.getElementById('cursoAluno').textContent = chamado.curso; //Esse tem que mudar pra ficar bonitinho na vizualização;
-        document.getElementById('emailAluno').textContent = chamado.emailAluno;
-        document.getElementById('idChamado').textContent = chamado.id;
-        document.getElementById('categoria').textContent = chamado.categoriaID;
-        document.getElementById('status').textContent = chamado.status;
-        document.getElementById('prioridade').textContent = chamado.prioridade;
-        document.getElementById('description').textContent = chamado.descricao;
 
-        detailChamadoBox.classList.toggle('active');
-        window.onclick = (event) => {
-            if (event.target == detailChamadoBox) {
-                detailChamadoBox.classList.remove('active');
+        try {
+            const response = await fetch(`https://localhost:5051/api/chamados/${chamado.id}`);
+
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar detalhes do chamado (HTTP ${response.status})`);
             }
-        }
 
-        
-        msgController.buscarMensagens(chamado.id);
-        msgController.initEventListeners(chamado.id);
+            const dados = await response.json();
+
+            this.chamado = chamado;
+            this.verificarResolvido(chamado);
+            document.getElementById('tituloChamado').textContent = dados.titulo;
+            document.getElementById('nomeAluno').textContent = dados.nomeUsuario;
+            document.getElementById('raAluno').textContent = dados.ra;
+            document.getElementById('cursoAluno').textContent = dados.curso; //Esse tem que mudar pra ficar bonitinho na vizualização;
+            document.getElementById('emailAluno').textContent = dados.emailUsuario;
+            document.getElementById('idChamado').textContent = dados.id;
+            document.getElementById('categoria').textContent = dados.categoria;
+            document.getElementById('status').textContent = dados.status;
+            document.getElementById('prioridade').textContent = dados.prioridade;
+            document.getElementById('description').textContent = dados.descricao;
+
+            detailChamadoBox.classList.toggle('active');
+
+            window.onclick = (event) => {
+                if (event.target == detailChamadoBox) {
+                    detailChamadoBox.classList.remove('active');
+                }
+            }
+
+            msgController.buscarMensagens(chamado.id);
+            msgController.initEventListeners(chamado.id);
+        } catch (erro) {
+            console.error('Erro ao abrir detalhes do chamado: ', erro);
+            alert('Não foi possível carregar os detalhes do chamado. Tente novamente.');
+        }
     }
 
     definirPrioridade(titulo){
@@ -753,20 +767,47 @@ class ControllerChamado {
             return;
         }
 
-        const chamadosCollectionRef = doc(db, `chamados/${this.chamado.id}`);
+        const token = localStorage.getItem("token");
 
+        const chamadoFormatado = {
+            ID: this.chamado.id,
+            UsuarioID: this.chamado.usuarioId,
+            CategoriaID: this.chamado.categoriaID,
+            Titulo: this.chamado.titulo,
+            Descricao: this.chamado.descricao,
+            Status: status || this.chamado.status,
+            Prioridade: this.chamado.prioridade
+        };
+        console.log(chamadoFormatado);
+        
         try {
-            if (status) {
-                this.chamado.status = status;
-            }
-            this.chamado.dataAtualizacao = new Date();
+            const response = await fetch(`https://localhost:5051/api/chamados/${this.chamado.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(chamadoFormatado)
+            });
 
-            await updateDoc(chamadosCollectionRef, this.chamado);
-
-            const chamadoAtualizado = await getDoc(chamadosCollectionRef);
-            if (chamadoAtualizado.exists()){
-                console.log("Dados atualizados: ", chamadoAtualizado.data());
+            if(!response.ok){
+                const erro = await response.text();
+                throw new Error(`Erro ao atualizar chamado: ${erro}`);
             }
+
+            if (response.status === 204){
+                console.log("Chamado atualizado com sucesso!");
+                
+            }
+
+            const text = await response.text();
+            if (text) {
+                const chamadoAtualizado = await response.json();
+                console.log("Chamado atualizado: ", chamadoAtualizado);
+                this.chamado = chamadoAtualizado;
+            }
+            
+
         } catch (error) {
             console.error("Erro ao tentar atualizar o documento do chamado: ", error);
             
@@ -775,27 +816,27 @@ class ControllerChamado {
 
     verificarResolvido(chamado){
         if(chamado.status === 'Resolvido'){
-            this.fecharBtnFinalizarCadastro();
+            this.fecharbtnFinalizarChamado();
             this.fecharControlesDoChat();
             this.fecharChatIA();
         } else {
-            this.abrirBtnFinalizarCadastro();
+            this.abrirbtnFinalizarChamado();
             this.abrirControlesDoChat();
             this.abrirChatIA();
         }
     }
 
-    fecharBtnFinalizarCadastro(){
-        const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
-        if (btnFinalizarCadastro){
-            btnFinalizarCadastro.classList.add('resolvido-config');
+    fecharbtnFinalizarChamado(){
+        const btnFinalizarChamado = document.getElementById('finalizarCadastro');
+        if (btnFinalizarChamado){
+            btnFinalizarChamado.classList.add('resolvido-config');
         }
     }
 
-    abrirBtnFinalizarCadastro(){
-        const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
-        if (btnFinalizarCadastro && btnFinalizarCadastro.classList.contains('resolvido-config')){
-            btnFinalizarCadastro.classList.remove('resolvido-config');
+    abrirbtnFinalizarChamado(){
+        const btnFinalizarChamado = document.getElementById('finalizarCadastro');
+        if (btnFinalizarChamado && btnFinalizarChamado.classList.contains('resolvido-config')){
+            btnFinalizarChamado.classList.remove('resolvido-config');
         }
     }
 
@@ -831,7 +872,7 @@ class ControllerChamado {
 
 const controllerChamado = new ControllerChamado();
 
-//melhorar esse addEventListener ai
+
 const btnAddCall = document.getElementById('addCall');
 if (btnAddCall){
     btnAddCall.addEventListener('click', () => {
@@ -842,7 +883,6 @@ if (btnAddCall){
         document.getElementById('formCategoria').value = '';
         document.getElementById('ra').value = '';
         document.getElementById('studentArea').value = '';
-        //document.getElementById('priority').value = '';
         document.getElementById('call-title').value = '';
         document.getElementById('formDescription').value = '';
     });
@@ -857,7 +897,6 @@ if (btnCancelCall){
         document.getElementById('fromCategoria').value = '';
         document.getElementById('ra').value = '';
         document.getElementById('studentArea').value = '';
-        //document.getElementById('priority').value = '';
         document.getElementById('call-title').value = '';
         document.getElementById('formDescription').value = '';
     });
@@ -871,6 +910,7 @@ if (tbody){
         //controllerChamado.cursorHistory.push(nextCursor);
 
         //controllerChamado.atualizarControles(isLastPage);
+        await controllerChamado.CarregarChamados();
     });
 }
 
@@ -889,6 +929,7 @@ if (btnCloseDetailsChamado){
             const respostaIA = document.getElementById('resposta-ia');
             respostaIA.textContent = '';
         }
+        controllerChamado.CarregarChamados();
     });
 }
 
@@ -929,11 +970,26 @@ if (btnNextPageTable){
     });
 }
 
-const btnFinalizarCadastro = document.getElementById('finalizarCadastro');
-if (btnFinalizarCadastro) {
-    btnFinalizarCadastro.addEventListener('click', () => {
-        controllerChamado.atualizarChamado('Resolvido');
-        alert('Chamado resolvido com sucesso!');
+const btnFinalizarChamado = document.getElementById('finalizarCadastro');
+if (btnFinalizarChamado) {
+    btnFinalizarChamado.addEventListener('click', async () => {
+        await controllerChamado.atualizarChamado('Resolvido');
+        //alert('Chamado resolvido com sucesso!');
+
+        const detailChamadoBox = document.querySelector('.details-chamado');
+        if (!detailChamadoBox) {
+            console.error('Não foi encontrado o Popup de detalhes do chamado.');
+            return;
+        }
+        detailChamadoBox.classList.toggle('active');
+
+        controllerChamado.CarregarChamados();
+    });
+}
+
+const btnRefreshChamado = document.querySelector('.btn_refresh');
+if (btnRefreshChamado) {
+    btnRefreshChamado.addEventListener('click', () => {
         controllerChamado.CarregarChamados();
     });
 }
@@ -968,24 +1024,15 @@ if (loginController.atualUser)
 //------------------------CHAT ONLINE-------------------------
 //------------------------------------------------------------
 
-class Msg {
-    toFirestore(){
-        return {
-            usuarioId: this.usuarioId,
-            mensagem: this.mensagem,
-            idChamado: this.idChamado,
-            dataEnvio: this.dataEnvio
-        };
-    }
-}
+class Msg {}
 
 class MsgBuilder {
     constructor(){
         this.msg = new Msg();
     }
 
-    definiridChamado(idChamado){
-        this.msg.idChamado = idChamado;
+    definirChamadoId(chamadoId){
+        this.msg.chamadoId = chamadoId;
         return this;
     }
 
@@ -1005,7 +1052,7 @@ class MsgBuilder {
     }
 
     build(){
-        if (!this.msg.usuarioId || !this.msg.idChamado || !this.msg.mensagem) {
+        if (!this.msg.usuarioId || !this.msg.chamadoId || !this.msg.mensagem) {
             console.error("Tentativa de construir mensaegm incompleta.");
             return null;
         }
@@ -1014,33 +1061,31 @@ class MsgBuilder {
 }
 
 class MsgController {
-    constructor(db, loginController){
-        this.db = db;
+    constructor( loginController){
         this.loginController = loginController;
-        this.currentUnsubscribe = null;
     }
 
 
     /**
      * @description Ponto de entrada para anexar listeners aos botões
-     * @param {string} idChamado - O Id do chamado que está sendo resolvido
+     * @param {string} chamadoId - O Id do chamado que está sendo resolvido
      */
-    initEventListeners(idChamado) {
+    initEventListeners(chamadoId) {
         const btnEnviarMsg = document.getElementById('enviar-msg');
         if (btnEnviarMsg){
             btnEnviarMsg.onclick = () => {
-                this.enviarMensagem(idChamado);
+                this.enviarMensagem(chamadoId);
+                this.buscarMensagens(chamadoId);
             };
         }
     }
 
     /**
      * Envia uma nova mensagem para o Firestore.
-     * @param {string} idChamado - O Id do chamado para o qual a mensagem será enviada.
+     * @param {string} chamadoId - O Id do chamado para o qual a mensagem será enviada.
      */
-    async enviarMensagem(idChamado){
-        const infos = this.lerMensagem(idChamado);
-
+    async enviarMensagem(chamadoId){
+        const infos = this.lerMensagem(chamadoId);
         if (!infos) {
             console.warn('Mensagem vazia ou dados de sessão ausentes. Não foi enviado.');
             return;
@@ -1052,27 +1097,41 @@ class MsgController {
             return;
         }
 
-        const mensagensCollectionRef = collection(this.db, "chamados", mensagem.idChamado, "mensagens");
-
         try {
-            let docRef = await addDoc(mensagensCollectionRef, mensagem.toFirestore());
-            console.log('Mensagem Enviada');
+            const response = await fetch("https://localhost:5051/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify({
+                    ChamadoID: mensagem.chamadoId,
+                    UsuarioID: mensagem.usuarioId,
+                    Mensagem: mensagem.mensagem
 
-            const inputMsg = document.getElementById('escrever-msg');
-            if (inputMsg) 
-                inputMsg.value = '';
+                })
+            });
+
+            if (!response.ok) throw new Error("Erro ao enviar mensagem");
+
+            const data = await response.json();
+            console.log("Mensagem enviada: ", data);
+            
+            document.getElementById('escrever-msg').value = '';
+            if(loginController.atualUser.papel == 'Funcionario' && controllerChamado.chamado.status != 'Em andamento')
+                controllerChamado.atualizarChamado('Em andamento')
 
         } catch (error){
-            console.error("Erro ao enviar a mensagem para o firestore:", error);
+            console.error("Erro ao enviar a mensagem:", error);
         }
     }
 
     /**
      * @description Lê os dados do DOM para criar uma mensagem.
-     * @param {string} idChamado - O Id do chamado atual.
+     * @param {string} chamadoId - O Id do chamado atual.
      * @returns {Object | null} Um objeto com os dados ou null se falhar.
      */
-    lerMensagem(idChamado){
+    lerMensagem(chamadoId){
         const inputMsg = document.getElementById('escrever-msg');
         const mensagem = inputMsg ? inputMsg.value.trim() : null;
 
@@ -1082,29 +1141,28 @@ class MsgController {
             return null;
         }
 
-        if(!idChamado){
+        if(!chamadoId){
             console.error('Erro ao tentar ler o id do Chamado.');
             return null;
         }
             
-        const userId = this.loginController.atualUser?.id;
-        if (!userId) {
+        const usuarioId = this.loginController.atualUser?.id;
+        if (!usuarioId) {
             console.error('Erro ao tentar identificar o id do usuário.');
             return null;
         }
 
-        return {mensagem, idChamado, userId};
+        return {mensagem, chamadoId, usuarioId};
     }
 
     /**
      * @description Constrói o objeto Msg usando o MsgBuilder.
-     * @param {Object} infos - O objeto retornado por lerMensagem.
+     * @param {Object} infos - O objeto retornado por lerMensagem, ou para mandar uma mensagem nova.
      * @returns {Msg} O objeto Msg construído.
      */
     criarMensagem(infos){
-        const mensagem = new MsgBuilder()
-            .definiridChamado(infos.idChamado)
-            .definirUsuarioId(infos.userId)
+        const mensagem = new MsgBuilder().definirChamadoId(infos.chamadoId)
+            .definirUsuarioId(infos.usuarioId)
             .definirMensagem(infos.mensagem)
             .definirDataEnvio(new Date())
             .build();
@@ -1114,43 +1172,56 @@ class MsgController {
 
     /**
      * @description Configura o listener (onSnapshot) para carregar e ouvir novas mensagens.
-     * @param {string} idChamado - O Id do chamado que o susário está vendo.
+     * @param {string} chamadoId - O Id do chamado que o susário está vendo.
      */
-    buscarMensagens(idChamado){
+    async buscarMensagens(chamadoId){
+        if (chatInterval){
+            clearInterval(chatInterval);
+            chatInterval = null;
+        }
+
         const chatDisplay = document.getElementById('ver-msg');
-        if (!chatDisplay) {
-            console.error('Não foi possível identificar a área do chat.');
-            return;
-        }
+        chatDisplay.innerHTML = '';
 
-        if (this.currentUnsubscribe) {
-            this.currentUnsubscribe();
-        }
-
-        const mensagensCollectionRef = collection(this.db, "chamados", idChamado, "mensagens");
-
-        const q = query(mensagensCollectionRef, orderBy('dataEnvio', 'asc'));
-
-        this.currentUnsubscribe = onSnapshot(q, (snapshot) => {
-            chatDisplay.innerHTML = '';
-
-            snapshot.forEach((doc) => {
-                const messageData = doc.data();
-
-                if (messageData.dataEnvio && typeof messageData.dataEnvio.toDate === 'function') { //perguntar sobre isso aqui
-                    messageData.dataEnvio = messageData.dataEnvio.toDate();
-                } else {
-                    messageData.dataEnvio = new Date(); //Fallback?
+        try {
+            const response = await fetch(`https://localhost:5051/api/chat/${chamadoId}`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
-
-                this.adicionarMensagem(messageData);
             });
 
-            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            if (response.status === 404) {
+                console.log("Ainda não há mensagens para este chamado.");
+                return[];
+            }
+            if (!response.ok) throw new Error("Erro ao buscar mensagens");
 
-        }, (error) => {
-            console.error('Erro ao buscar mensagens: ', error);
-        });
+            const popupDetailsChamado = document.querySelector('.details-chamado');
+            const mensagens = await response.json();
+
+            mensagens.forEach(msg => {                
+                this.adicionarMensagem({
+                    mensagem: msg.mensagem,
+                    usuarioId: msg.usuarioID,
+                    dataEnvio: new Date(msg.dataEnvio)
+                });
+            });
+
+            window.chamadoAtivoId = chamadoId;
+            if(popupDetailsChamado.classList.contains('active')){
+                
+                chatInterval = setInterval( async () => {
+                    if (window.chamadoAtivoId !== chamadoId) 
+                        this.buscarMensagens(chamadoId);
+                }, 3000);
+            } else
+                clearInterval(chatInterval)
+             
+
+            
+        } catch (erro) {
+            console.error("Erro ao buscar mensagens: ", erro);
+        }
     }
 
     /**
@@ -1165,7 +1236,8 @@ class MsgController {
         }
 
         const currentUserId = this.loginController.atualUser.id;
-        const isCurrentUser = mensagem.usuarioId === currentUserId;
+        const isCurrentUser = mensagem.usuarioId == currentUserId;
+        
 
         const messageWrapper = document.createElement('div');
         messageWrapper.classList.add('balao-de-fala');
@@ -1187,8 +1259,9 @@ class MsgController {
         chatDisplay.appendChild(messageWrapper);
     }
 }
+let chatInterval = null;
+const msgController = new MsgController(loginController);
 
-//const msgController = new MsgController(db, loginController);
 
 //------------------------------------------------------------------
 //---------------------------GEMINI AI------------------------------
