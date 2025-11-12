@@ -878,11 +878,11 @@ if (btnAddCall){
     btnAddCall.addEventListener('click', () => {
         controllerChamado.execute();
         
-        document.getElementById('studentName').value = '';
-        document.getElementById('studentEmail').value = '';
-        document.getElementById('formCategoria').value = '';
-        document.getElementById('ra').value = '';
-        document.getElementById('studentArea').value = '';
+        //document.getElementById('studentName').value = '';
+        //document.getElementById('studentEmail').value = '';
+        document.getElementById('formCategoria').value = "";
+        //document.getElementById('ra').value = '';
+        //document.getElementById('studentArea').value = '';
         document.getElementById('call-title').value = '';
         document.getElementById('formDescription').value = '';
     });
@@ -892,11 +892,11 @@ if (btnAddCall){
 const btnCancelCall = document.querySelector('.btn_cancel');
 if (btnCancelCall){
     btnCancelCall.addEventListener('click', () => {
-        document.getElementById('studentName').value = '';
-        document.getElementById('studentEmail').value = '';
-        document.getElementById('fromCategoria').value = '';
-        document.getElementById('ra').value = '';
-        document.getElementById('studentArea').value = '';
+        //document.getElementById('studentName').value = '';
+        //document.getElementById('studentEmail').value = '';
+        document.getElementById('fromCategoria').value = "";
+        //document.getElementById('ra').value = '';
+        //document.getElementById('studentArea').value = '';
         document.getElementById('call-title').value = '';
         document.getElementById('formDescription').value = '';
     });

@@ -1,16 +1,2 @@
 /*na primeira tela a de escolher a plataform, pra pc coloca a barte branca esticadona de cima pra baixo, tipo uma coluna/pilar. Vai ficar maneiro, confia*/
 
-@media screen and (min-width: 1200px) {
-  nav {
-    left: 0;
-    position: relative;
-  }
-
-  .menu {
-    display: none;
-  }
-
-  .material-symbols-outlined.close-nav {
-    display: none;
-  }
-}

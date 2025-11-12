@@ -34,32 +34,27 @@
         <h2>Novo Chamado</h2>
         <hr>
         <div class="forms forms-newcall scroll-xy">
-            <!--Inserir nome do Aluno-->
-            <label for="studentName" class="label-chamado">Nome Completo do Aluno<span class="required">*</span></label>
+            <!--Inserir nome do Aluno
+                <label for="studentName" class="label-chamado">Nome Completo do Aluno<span class="required">*</span></label>
             <input type="text" name="studentName" id="studentName" class="input-chamado" autocomplete="name" value="" required>
-            <div class="small-input">
+            -->
+            
+            <!--<div class="small-input">
                 <div class="group-input">
-                    <!--Inserir o RA do Aluno-->
+                    Inserir o RA do Aluno
+                    
                     <label for="ra">RA <span class="required">*</span></label>
                     <input type="text" name="ra" id="ra" value="" required>
-                    <!--Inserir a Categoria-->
-                    <label for="formCategoria">Categoria <span class="required">*</span></label>
-                    <select name="formCategoria" id="formCategoria" required>
-                        <option value="" hidden selected>Escolha uma categoria</option>
-                        <option value="Acesso">Acesso</option>
-                        <option value="Financeiro">Financeiro</option>
-                        <option value="E-mail">E-mail</option>
-                        <option value="Rede">Rede</option>
-                        <option value="Hardware">Hardware</option>
-                        <option value="Software">Software</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
+                    
+                    
+                </div>--><!--
                 <div class="group-input">
-                    <!--Inserir E-mail do Aluo-->
+                    Inserir E-mail do Aluo
+                    
                     <label for="studentEmail">E-mail <span class="required">*</span></label>
                     <input type="email" name="studentEmail" id="studentEmail" autocomplete="email" value="" required>
-                    <!--Inserir o Curso do ALuno-->
+                    -->
+                    <!--Inserir o Curso do ALuno
                     <label for="studentArea">Curso <span class="required">*</span></label>
                     <select type="text" name="studentArea" id="studentArea" required>
                         <option value="" selected hidden>Escolha um Curso</option>
@@ -73,13 +68,28 @@
                         <option value="direito">Direito</option>
                     </select>
                     
+                    
+                    
                 </div>
             </div>
-            <br>
+            <br>-->
             <div class="group-input">
                 <!--Inserir um título para identificar o problema-->
                 <label for="call-title">Título do Problema <span class="required">*</span></label>
                 <input type="text" name="call-title" id="call-title" value="" maxlength="100" required>
+                
+                <!--Inserir a Categoria-->
+                <label for="formCategoria">Categoria <span class="required">*</span></label>
+                    <select name="formCategoria" id="formCategoria" required>
+                        <option value="default" hidden selected>Escolha uma categoria</option>
+                        <option value="Acesso">Acesso</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="E-mail">E-mail</option>
+                        <option value="Rede">Rede</option>
+                        <option value="Hardware">Hardware</option>
+                        <option value="Software">Software</option>
+                        <option value="Outros">Outros</option>
+                    </select>
                 <!--Descrever a situação do problema-->
                 <label for="formDescription">Descrição da Dúvida <span class="required">*</span></label>
                 <textarea name="formDescription" id="formDescription" rows="5" maxlength="300" required></textarea>

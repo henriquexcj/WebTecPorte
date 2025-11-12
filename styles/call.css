@@ -226,7 +226,7 @@ td p {
     width: 85%;
     max-width: 600px;
     height: 70%;
-    max-height: 800px;
+    max-height: 560px;
     color: var(--texto);
 
     border: 2px solid rgba(0, 0, 0, 0.1);
@@ -336,6 +336,7 @@ td p {
     order: 1;
     background-color: var(--fundo);
     color: var(--texto);
+    cursor: pointer;
 }
 
 .details-chamado {
@@ -567,8 +568,6 @@ main {
     margin: 0;
     flex: 0;
 }
-
-
 
 .chat-ia {
     margin-top: 12px;
