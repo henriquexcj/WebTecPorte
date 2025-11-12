@@ -1,2 +1,0 @@
-Essa é a string de conexão com o banco de dados
-Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;
